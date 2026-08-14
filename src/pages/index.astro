@@ -1,11 +1,432 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const projects = [
+	{
+		name: 'DrX Telehealth',
+		meta: 'React Native, Expo, Firebase, Google Cloud, Stripe',
+		description:
+			'Modernized a telehealth app from concept through iOS and Google Play launch with WebRTC video, real-time chat, payments, and a redesigned Figma-led experience.',
+	},
+	{
+		name: 'Wird for Usera.Space',
+		meta: 'Expo, Firebase, RevenueCat, React Three Fiber',
+		description:
+			'Built a habit-tracking iOS app with subscriptions, push notifications, and interactive 3D features, alongside web properties using Next.js, Payload CMS, SSR, and AWS SST.',
+	},
+	{
+		name: 'Gametime Rehab',
+		meta: 'React Native, Expo, Firebase, Python, Playwright',
+		description:
+			'Delivered an MVP with a library of 3,000+ rehab exercises and automated data collection pipelines for exercise ingestion and processing.',
+	},
+];
+
+const skills = [
+	'TypeScript',
+	'React',
+	'Next.js',
+	'React Native',
+	'Expo',
+	'Python',
+	'AWS',
+	'Google Cloud',
+	'Firebase',
+	'Shopify',
+	'GraphQL',
+	'Figma',
+];
 ---
 
-<Layout>
-	<Welcome />
+<Layout
+	title="json.win - Jason Nguyen"
+	description="Portfolio of Jason Nguyen, a computer scientist and full-stack developer building web, mobile, cloud, and mission software."
+>
+	<header class="floating-header" aria-label="Primary navigation">
+		<a class="muted" href="#top">json.win</a>
+		<span class="home-separator" aria-hidden="true">/</span>
+		<a class="muted" href="#work">work</a>
+		<span aria-hidden="true">/</span>
+		<a href="#contact">Jason Nguyen</a>
+	</header>
+
+	<main id="top" class="site-shell">
+		<section class="hero" aria-labelledby="hero-title">
+			<p class="eyebrow">Computer Scientist / Full-Stack Developer</p>
+			<h1 id="hero-title">Jason Nguyen</h1>
+			<p class="summary">
+				I build production web, mobile, and cloud software across React, Next.js, React Native,
+				TypeScript, Python, AWS, Google Cloud, and Firebase.
+			</p>
+			<div class="actions" aria-label="Contact links">
+				<a class="primary-action" href="mailto:jason.n.nguyen.04@gmail.com">Email</a>
+				<a href="https://github.com/mrboom192">GitHub</a>
+				<a href="/jason-nguyen-resume.pdf">Resume</a>
+			</div>
+		</section>
+
+		<section class="section intro" aria-labelledby="intro-title">
+			<h2 id="intro-title">Intro</h2>
+			<p>
+				json.win is my portfolio for applied software work: mission-critical Air Force systems,
+				client products, mobile launches, e-commerce builds, automation projects, and the kind
+				of product engineering that has to survive real users.
+			</p>
+		</section>
+
+		<section id="work" class="section" aria-labelledby="experience-title">
+			<h2 id="experience-title">Experience</h2>
+			<div class="timeline">
+				<article>
+					<div>
+						<h3>United States Air Force</h3>
+						<p>Computer Scientist, Tinker AFB</p>
+					</div>
+					<time>May 2026 - Present</time>
+				</article>
+				<article>
+					<div>
+						<h3>Freelance</h3>
+						<p>Full-stack developer for web, mobile, and e-commerce products.</p>
+					</div>
+					<time>Dec 2024 - Apr 2026</time>
+				</article>
+				<article>
+					<div>
+						<h3>UFLIP</h3>
+						<p>Software engineer intern building inventory, admin, and staff management apps.</p>
+					</div>
+					<time>Feb 2023 - Sep 2024</time>
+				</article>
+			</div>
+		</section>
+
+		<section class="section" aria-labelledby="projects-title">
+			<h2 id="projects-title">Selected Work</h2>
+			<div class="project-list">
+				{
+					projects.map((project) => (
+						<article class="project">
+							<p class="project-meta">{project.meta}</p>
+							<h3>{project.name}</h3>
+							<p>{project.description}</p>
+						</article>
+					))
+				}
+			</div>
+		</section>
+
+		<section class="section split" aria-labelledby="skills-title">
+			<div>
+				<h2 id="skills-title">Stack</h2>
+				<p>
+					Tools I reach for across product UI, native apps, backend integrations, deployment,
+					payments, real-time features, automation, and technical design.
+				</p>
+			</div>
+			<ul class="skill-list" aria-label="Skills">
+				{skills.map((skill) => <li>{skill}</li>)}
+			</ul>
+		</section>
+
+		<section id="contact" class="section closing" aria-labelledby="contact-title">
+			<p class="eyebrow">Norman, OK / Oklahoma City, OK</p>
+			<h2 id="contact-title">Building useful software, carefully.</h2>
+			<p>
+				Open to focused engineering work across full-stack product development, mobile apps,
+				cloud systems, and developer tooling.
+			</p>
+			<a class="primary-action" href="mailto:jason.n.nguyen.04@gmail.com">jason.n.nguyen.04@gmail.com</a>
+		</section>
+	</main>
 </Layout>
+
+<style>
+	.floating-header {
+		position: fixed;
+		top: 30px;
+		left: 50%;
+		z-index: 10;
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		width: max-content;
+		max-width: calc(100vw - 32px);
+		padding: 13px 20px;
+		color: #111111;
+		background: rgba(255, 255, 255, 0.82);
+		border: 2px solid #1f1f1f;
+		border-radius: 999px;
+		box-shadow: 0 4px 13px rgba(0, 0, 0, 0.16);
+		backdrop-filter: blur(18px);
+		transform: translateX(-50%);
+	}
+
+	.floating-header a {
+		font-size: 17px;
+		font-weight: 600;
+		line-height: 1;
+		text-decoration: none;
+		white-space: nowrap;
+	}
+
+	.floating-header .muted,
+	.floating-header span {
+		color: #b3b3b3;
+		font-weight: 500;
+	}
+
+	.site-shell {
+		width: min(100%, 820px);
+		margin: 0 auto;
+		padding: 150px 24px 86px;
+	}
+
+	.hero {
+		max-width: 720px;
+	}
+
+	.eyebrow {
+		margin: 0 0 12px;
+		color: #5c6a63;
+		font-size: 15px;
+		font-weight: 700;
+		line-height: 1.3;
+		text-transform: uppercase;
+	}
+
+	h1,
+	h2,
+	h3,
+	p {
+		letter-spacing: 0;
+	}
+
+	h1 {
+		margin: 0;
+		font-size: clamp(48px, 8vw, 76px);
+		font-weight: 800;
+		line-height: 0.94;
+	}
+
+	h2 {
+		margin: 0 0 24px;
+		font-size: clamp(28px, 4vw, 38px);
+		font-weight: 800;
+		line-height: 1.05;
+	}
+
+	h3 {
+		margin: 0;
+		font-size: 1.25rem;
+		font-weight: 800;
+		line-height: 1.1;
+	}
+
+	p {
+		margin: 0;
+		font-size: 1rem;
+		line-height: 1.6;
+	}
+
+	.summary {
+		max-width: 620px;
+		margin-top: 18px;
+		color: #242424;
+		font-size: 1.125rem;
+		line-height: 1.55;
+	}
+
+	.actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 12px;
+		margin-top: 28px;
+	}
+
+	.actions a,
+	.primary-action {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 43px;
+		padding: 0 16px;
+		color: #111111;
+		background: rgba(255, 255, 255, 0.74);
+		border: 1.5px solid #222222;
+		border-radius: 999px;
+		font-size: 16px;
+		font-weight: 700;
+		line-height: 1;
+		text-decoration: none;
+		box-shadow: 0 2px 0 rgba(0, 0, 0, 0.14);
+		transition:
+			transform 160ms ease,
+			box-shadow 160ms ease,
+			background 160ms ease;
+	}
+
+	.actions a:hover,
+	.primary-action:hover {
+		background: #c8f7d9;
+		box-shadow: 0 4px 0 rgba(0, 0, 0, 0.16);
+		transform: translateY(-2px);
+	}
+
+	.section {
+		margin-top: 64px;
+	}
+
+	.intro {
+		max-width: 820px;
+	}
+
+	.intro p,
+	.split p,
+	.closing p {
+		color: #222222;
+		font-size: 1rem;
+		line-height: 1.65;
+	}
+
+	.timeline {
+		display: grid;
+		gap: 14px;
+	}
+
+	.timeline article {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		gap: 24px;
+		align-items: start;
+		padding: 20px 0;
+		border-top: 1.5px solid rgba(17, 17, 17, 0.18);
+	}
+
+	.timeline article:last-child {
+		border-bottom: 1.5px solid rgba(17, 17, 17, 0.18);
+	}
+
+	.timeline p,
+	.project p {
+		margin-top: 8px;
+		color: #3d3d3d;
+		font-size: 1rem;
+		line-height: 1.55;
+	}
+
+	time,
+	.project-meta {
+		color: #6a6a6a;
+		font-size: 15px;
+		font-weight: 700;
+		line-height: 1.3;
+		text-align: right;
+	}
+
+	.project-list {
+		display: grid;
+		gap: 14px;
+	}
+
+	.project {
+		padding: 20px;
+		background: rgba(255, 255, 255, 0.72);
+		border: 1.5px solid rgba(17, 17, 17, 0.14);
+		border-radius: 8px;
+	}
+
+	.project-meta {
+		margin: 0 0 18px;
+		text-align: left;
+	}
+
+	.split {
+		display: grid;
+		grid-template-columns: minmax(220px, 0.8fr) minmax(320px, 1fr);
+		gap: 42px;
+		align-items: start;
+	}
+
+	.skill-list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 10px;
+		margin: 4px 0 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.skill-list li {
+		padding: 9px 12px;
+		background: #ffffff;
+		border: 1px solid rgba(17, 17, 17, 0.2);
+		border-radius: 999px;
+		color: #1f1f1f;
+		font-size: 15px;
+		font-weight: 700;
+		line-height: 1;
+	}
+
+	.closing {
+		padding: 42px 0 0;
+		border-top: 2px solid #111111;
+	}
+
+	.closing .primary-action {
+		margin-top: 28px;
+	}
+
+	@media (max-width: 820px) {
+		.floating-header {
+			top: 18px;
+			padding: 11px 15px;
+		}
+
+		.floating-header a {
+			font-size: 15px;
+		}
+
+		.site-shell {
+			padding-top: 112px;
+		}
+
+		.split {
+			grid-template-columns: 1fr;
+			gap: 24px;
+		}
+	}
+
+	@media (max-width: 560px) {
+		.site-shell {
+			padding-inline: 18px;
+			padding-bottom: 58px;
+		}
+
+		.floating-header {
+			gap: 7px;
+		}
+
+		.floating-header .muted:first-child,
+		.floating-header .home-separator {
+			display: none;
+		}
+
+		h1 {
+			font-size: 52px;
+		}
+
+		.timeline article {
+			grid-template-columns: 1fr;
+			gap: 9px;
+		}
+
+		time {
+			text-align: left;
+		}
+
+		.section {
+			margin-top: 58px;
+		}
+	}
+</style>
