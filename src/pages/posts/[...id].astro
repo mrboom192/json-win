@@ -1,0 +1,62 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import Layout from '../../layouts/Layout.astro';
+import { formatDate } from '../../lib/posts';
+export const prerender = true;
+export async function getStaticPaths() {
+  const posts = await getCollection('posts', ({ data }) => !data.draft);
+  return posts.map((post) => ({ params: { id: post.id }, props: { post } }));
+}
+interface Props { post: CollectionEntry<'posts'>; }
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+<Layout title={`${post.data.title} | Jason Nguyen`} description={post.data.description ?? post.data.title}>
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="/">Home</a><span aria-hidden="true">/</span><span aria-current="page">{post.data.title}</span>
+  </nav>
+  <main class="post">
+    <article>
+      <header class:list={['post-header', { 'with-image': post.data.image }]}>
+        {post.data.image && <Image src={post.data.image} alt={post.data.imageAlt} width={440} class="cover" loading="eager" />}
+        <div><h1>{post.data.title}</h1><time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time></div>
+      </header>
+      <div class="prose"><Content /></div>
+    </article>
+    <footer><a href="/">Back to home</a></footer>
+  </main>
+</Layout>
+<style>
+  .breadcrumb { display: flex; align-items: baseline; gap: 10px; width: fit-content; max-width: calc(100% - 40px); margin: 18px auto 0; padding: 9px 14px; border: 1px solid #777; background: #fff; box-shadow: 0 2px 3px #0002; font-size: 12px; line-height: 1.5; }
+  .breadcrumb a, .breadcrumb > span:first-of-type { color: #666; }
+  .breadcrumb > span:last-child { overflow-wrap: anywhere; min-width: 0; }
+  .post { width: min(100% - 40px, 680px); margin: 0 auto; padding: 40px 0 72px; }
+  .post-header { display: grid; align-items: center; gap: 32px; min-height: 180px; margin-bottom: 44px; }
+  .with-image { grid-template-columns: 220px minmax(0, 1fr); }
+  .cover { width: 100%; height: 220px; object-fit: contain; }
+  h1 { margin: 0 0 12px; font-size: 28px; line-height: 1.35; overflow-wrap: anywhere; }
+  time { font-size: 13px; color: #555; }
+  .prose { font-size: 14px; line-height: 1.8; overflow-wrap: anywhere; }
+  .prose :global(h1), .prose :global(h2), .prose :global(h3), .prose :global(h4) { margin: 40px 0 18px; line-height: 1.4; }
+  .prose :global(h1), .prose :global(h2) { font-size: 22px; }
+  .prose :global(h3) { font-size: 18px; }
+  .prose :global(p), .prose :global(ul), .prose :global(ol) { margin: 0 0 22px; }
+  .prose :global(ul), .prose :global(ol) { padding-left: 24px; }
+  .prose :global(li > ul), .prose :global(li > ol) { margin-bottom: 0; }
+  .prose :global(img), .prose :global(video) { display: block; max-width: 100%; height: auto; margin: 30px auto; }
+  .prose :global(pre) { max-width: 100%; padding: 20px; overflow-x: auto; font-size: 13px; line-height: 1.65; }
+  .prose :global(code) { font-family: inherit; }
+  .prose :global(:not(pre) > code) { background: #f1f1f1; padding: 2px 4px; }
+  .prose :global(blockquote) { margin: 28px 0; padding-left: 20px; border-left: 2px solid #aaa; color: #555; }
+  .prose :global(table) { display: block; overflow-x: auto; border-collapse: collapse; margin: 28px 0; }
+  .prose :global(th), .prose :global(td) { border-bottom: 1px solid #ddd; padding: 10px 16px; text-align: left; }
+  .prose :global(hr) { border: 0; border-top: 1px solid #ddd; margin: 40px 0; }
+  footer { margin-top: 56px; padding-top: 24px; border-top: 1px solid #e5e5e5; font-size: 13px; }
+  @media (max-width: 540px) {
+    .with-image { grid-template-columns: 1fr; gap: 20px; }
+    .cover { width: 180px; height: 180px; }
+    h1 { font-size: 24px; }
+    .post-header { min-height: 140px; }
+  }
+</style>

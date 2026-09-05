@@ -6,7 +6,7 @@ interface Props {
 
 const {
 	title = 'json.win - Jason Nguyen',
-	description = 'Portfolio of Jason Nguyen, a computer scientist and full-stack developer building web, mobile, and cloud software.',
+	description = 'Notes and writing by Jason Nguyen.',
 } = Astro.props;
 ---
 
@@ -21,7 +21,7 @@ const {
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link
-			href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap"
+			href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,600;1,400&display=swap"
 			rel="stylesheet"
 		/>
 		<meta name="generator" content={Astro.generator} />
@@ -35,10 +35,10 @@ const {
 <style is:global>
 	:root {
 		color: #111111;
-		background: #fbfbf8;
-		--font-body: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
-			sans-serif;
-		--font-title: Baskerville, 'Baskerville Old Face', 'Libre Baskerville', Georgia, serif;
+		background: #ffffff;
+		--font-body: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+			'Liberation Mono', monospace;
+		--font-title: var(--font-body);
 		font-family: var(--font-body);
 		font-size: 16px;
 		font-synthesis: none;
@@ -59,7 +59,7 @@ const {
 
 	body {
 		position: relative;
-		background: #fbfbf8;
+		background: #ffffff;
 		color: #111111;
 		font-size: 1rem;
 	}
@@ -71,12 +71,12 @@ const {
 		left: 0;
 		z-index: 0;
 		width: 100%;
-		height: 58vh;
+		height: 240px;
 		pointer-events: none;
 		background:
 			linear-gradient(rgba(18, 18, 18, 0.045) 1px, transparent 1px),
 			linear-gradient(90deg, rgba(18, 18, 18, 0.045) 1px, transparent 1px);
-		background-size: 22px 22px;
+		background-size: 10px 10px;
 		mask-image: linear-gradient(to bottom, #000 0%, #000 42%, transparent 100%);
 		-webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 42%, transparent 100%);
 	}
@@ -88,7 +88,12 @@ const {
 
 	a {
 		color: inherit;
+		text-underline-offset: 4px;
 	}
+
+	a:hover { color: #397553; }
+	:focus-visible { outline: 2px solid #397553; outline-offset: 5px; }
+	strong, b { font-weight: 600; }
 
 	::selection {
 		background: #b8f7d0;
