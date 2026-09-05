@@ -1,8 +1,8 @@
 ---
-title: First post
+title: Template post
 date: 2026-09-05
 description: A starting point for a new post.
-draft: false
+draft: true
 ---
 
 ## Intro
