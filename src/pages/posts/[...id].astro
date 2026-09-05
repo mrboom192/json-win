@@ -15,7 +15,9 @@ const { Content } = await render(post);
 ---
 <Layout title={`${post.data.title} | Jason Nguyen`} description={post.data.description ?? post.data.title}>
   <nav class="breadcrumb" aria-label="Breadcrumb">
-    <a href="/">Back to home</a>
+    <a href="/">Home</a>
+    <span class="breadcrumb-separator" aria-hidden="true"></span>
+    <span class="breadcrumb-current" aria-current="page">{post.data.title}</span>
   </nav>
   <main class="post">
     <article>
@@ -25,13 +27,39 @@ const { Content } = await render(post);
       </header>
       <div class="prose"><Content /></div>
     </article>
-    <footer><a href="/">Back to home</a></footer>
   </main>
 </Layout>
+<script>
+  const breadcrumb = document.querySelector<HTMLElement>('.breadcrumb');
+
+  if (breadcrumb) {
+    let previousScrollY = window.scrollY;
+    let ticking = false;
+
+    const updateBreadcrumb = () => {
+      const currentScrollY = Math.max(window.scrollY, 0);
+      const scrollingDown = currentScrollY > previousScrollY;
+
+      breadcrumb.classList.toggle('breadcrumb-hidden', scrollingDown && currentScrollY > 80);
+      previousScrollY = currentScrollY;
+      ticking = false;
+    };
+
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateBreadcrumb);
+        ticking = true;
+      }
+    }, { passive: true });
+  }
+</script>
 <style>
-  .breadcrumb { display: flex; align-items: baseline; gap: 10px; width: fit-content; max-width: calc(100% - 40px); margin: 18px auto 0; padding: 9px 14px; border: 1px solid #777; background: #fff; box-shadow: 0 2px 3px #0002; font-size: 12px; line-height: 1.5; }
-  .breadcrumb a, .breadcrumb > span:first-of-type { color: #666; }
-  .breadcrumb > span:last-child { overflow-wrap: anywhere; min-width: 0; }
+  .breadcrumb { position: sticky; top: 1rem; z-index: 10; display: flex; align-items: center; gap: 0.5rem; width: fit-content; max-width: calc(100% - 40px); min-height: 40px; margin: 10px auto 0; padding: 8px 12px; border: 1px solid #111; background: #fff; box-shadow: 0 2px 3px #0003; font-family: var(--font-body); font-size: 14px; line-height: 1.5; transition: transform 220ms ease, opacity 180ms ease; will-change: transform; }
+  .breadcrumb-hidden { transform: translateY(calc(-100% - 20px)); opacity: 0; pointer-events: none; }
+  .breadcrumb a { color: #aaa; text-decoration: none; }
+  .breadcrumb a:hover { color: #666; }
+  .breadcrumb-separator { width: 8px; height: 8px; flex: 0 0 auto; border-top: 1px solid #aaa; border-right: 1px solid #aaa; transform: rotate(45deg); }
+  .breadcrumb-current { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .post { width: min(100% - 40px, 680px); margin: 0 auto; padding: 4rem 0 72px; }
   .post-header { display: grid; align-items: center; gap: 32px; margin-bottom: 44px; }
   .with-image { grid-template-columns: 220px minmax(0, 1fr); }
@@ -49,16 +77,22 @@ const { Content } = await render(post);
   .prose :global(pre) { max-width: 100%; padding: 20px; overflow-x: auto; font-size: 13px; line-height: 1.65; }
   .prose :global(code) { font-family: inherit; }
   .prose :global(:not(pre) > code) { background: #f1f1f1; padding: 2px 4px; }
-  .prose :global(.katex) { font-size: 1em; display: flex; justify-content: center; align-items: center;}
+  .prose :global(.katex) { font-size: 1em; }
+  .prose :global(.katex-display) { display: flex; justify-content: center; margin: 30px 0; overflow-x: auto; overflow-y: hidden; padding-bottom: 4px; text-align: center; }
+  .prose :global(.katex-display > .katex) { flex: 0 0 auto; }
   .prose :global(blockquote) { margin: 28px 0; padding-left: 20px; border-left: 2px solid #aaa; color: #555; }
   .prose :global(table) { display: block; overflow-x: auto; border-collapse: collapse; margin: 28px 0; }
   .prose :global(th), .prose :global(td) { border-bottom: 1px solid #ddd; padding: 10px 16px; text-align: left; }
   .prose :global(hr) { border: 0; border-top: 1px solid #ddd; margin: 40px 0; }
-  footer { margin-top: 56px; padding-top: 24px; border-top: 1px solid #e5e5e5; font-size: 13px; }
   @media (max-width: 540px) {
+    .breadcrumb { width: calc(100% - 24px); max-width: none; }
+    .breadcrumb-hidden { transform: translateY(calc(-100% - 14px)); }
     .with-image { grid-template-columns: 1fr; gap: 20px; }
     .cover { width: 180px; height: 180px; }
     h1 { font-size: 24px; }
     .post-header { min-height: 140px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .breadcrumb { transition: none; }
   }
 </style>
