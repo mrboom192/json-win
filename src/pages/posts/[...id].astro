@@ -1,6 +1,7 @@
 ---
 import { getCollection, render, type CollectionEntry } from 'astro:content';
 import { Image } from 'astro:assets';
+import 'katex/dist/katex.min.css';
 import Layout from '../../layouts/Layout.astro';
 import { formatDate } from '../../lib/posts';
 export const prerender = true;
@@ -48,6 +49,7 @@ const { Content } = await render(post);
   .prose :global(pre) { max-width: 100%; padding: 20px; overflow-x: auto; font-size: 13px; line-height: 1.65; }
   .prose :global(code) { font-family: inherit; }
   .prose :global(:not(pre) > code) { background: #f1f1f1; padding: 2px 4px; }
+  .prose :global(.katex) { font-size: 1em; display: flex; justify-content: center; align-items: center;}
   .prose :global(blockquote) { margin: 28px 0; padding-left: 20px; border-left: 2px solid #aaa; color: #555; }
   .prose :global(table) { display: block; overflow-x: auto; border-collapse: collapse; margin: 28px 0; }
   .prose :global(th), .prose :global(td) { border-bottom: 1px solid #ddd; padding: 10px 16px; text-align: left; }
