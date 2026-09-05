@@ -26,6 +26,7 @@ const posts = (await getCollection('posts', ({ data }) => !data.draft))
   </main>
 </Layout>
 <style>
+  header { display: flex; flex-direction: column; justify-content: center; align-items: center;}
   .home { width: min(100% - 40px, 680px); margin: 0 auto; padding: 7rem 0 5rem; }
   h1 { margin: 0; font-size: 36px; line-height: 1.3; overflow-wrap: anywhere; }
   .email { margin: 0.5rem 0 0; color: #666; font-size: 13px; line-height: 1.7; overflow-wrap: anywhere; }
