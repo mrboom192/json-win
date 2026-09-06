@@ -10,6 +10,9 @@ import cloudflare from "@astrojs/cloudflare";
 export default defineConfig({
   adapter: cloudflare(),
   markdown: {
+    shikiConfig: {
+      theme: "ayu-light",
+    },
     processor: unified({
       remarkPlugins: [remarkMath],
       rehypePlugins: [rehypeKatex],
