@@ -44,6 +44,7 @@ const { Content } = await render(post);
               rotation={post.data.titleModelRotation}
               zoom={post.data.titleModelZoom}
               wireframe={String(post.data.titleModelWireframe)}
+              wireframe-style={post.data.titleModelWireframeStyle}
               aria-label={`Interactive 3D model for ${post.data.title}`}
             >
               <a href={post.data.titleModel}>Download the 3D model</a>

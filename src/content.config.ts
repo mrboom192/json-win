@@ -15,6 +15,7 @@ const posts = defineCollection({
     titleModelRotation: z.number().finite().default(0),
     titleModelZoom: z.number().finite().min(0.25).max(4).default(1),
     titleModelWireframe: z.boolean().default(false),
+    titleModelWireframeStyle: z.enum(['triangles', 'quads']).default('triangles'),
   }),
 });
 export const collections = { posts };

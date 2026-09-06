@@ -9,6 +9,7 @@ titleModel: /models/octree.glb
 titleModelRotation: 45
 titleModelZoom: 1.2
 titleModelWireframe: true
+titleModelWireframeStyle: quads
 ```
 
 `titleModelRotation` rotates the centered model around its Y axis (left/right)
@@ -16,6 +17,10 @@ in degrees. It defaults to `0`; use positive or negative values to turn it.
 `titleModelZoom` defaults to `1`; larger values zoom in and smaller values zoom
 out (supported range: `0.25`–`4`). `titleModelWireframe` defaults to `false`;
 set it to `true` to draw dark triangle edges over the shaded, textured model.
+`titleModelWireframeStyle` accepts `triangles` (default) or `quads`.
+The quad style hides the shared diagonal of near-coplanar triangle pairs while
+preserving grid edges. GLB files contain triangles, so this is an approximation:
+unmatched triangles and curved faces may still show triangle edges.
 These settings affect only the header viewer. Dragging and zooming still work,
 and the Home key resets the camera to the configured initial view.
 

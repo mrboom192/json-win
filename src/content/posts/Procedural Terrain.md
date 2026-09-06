@@ -7,6 +7,7 @@ titleModel: /models/octree.glb
 titleModelZoom: 0.5
 titleModelWireframe: true
 titleModelRotation: -99.5
+titleModelWireframeStyle: quads
 ---
 
 ## Intro
