@@ -22,6 +22,10 @@ float displacement = noise.GetNoise2D(v.x, v.z);
 
 We then use `displacement` to modify the vertex's y-coordinate. Repeating this for every vertex produces fairly believable-looking terrain.
 
+<wireframe-model-viewer src="/models/plane-noise-simple.glb" aria-label="Interactive wireframe model of a plane displaced with noise">
+  <a href="/models/plane-noise-simple.glb">Download the 3D model</a>
+</wireframe-model-viewer>
+
 If we wanted a bigger map, we could have the surface stretch out farther and also increase the number of vertices so that the resolution remains high. But we can only do this so much before we hit the first set of bottlenecks: **memory** and **generation time**. At some point, the surface will contain so many vertices that it consumes a significant amount of memory and, depending on the hardware, takes far too long to generate. Scaling our terrain this way makes it impractical for games, so we need another solution.
 
 ## Level of detail

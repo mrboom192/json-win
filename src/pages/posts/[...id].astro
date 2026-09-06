@@ -53,6 +53,10 @@ const { Content } = await render(post);
   </main>
 </Layout>
 <script>
+  if (document.querySelector("wireframe-model-viewer")) {
+    void import("../../scripts/wireframe-model-viewer");
+  }
+
   const breadcrumb = document.querySelector<HTMLElement>(".breadcrumb");
 
   if (breadcrumb) {
