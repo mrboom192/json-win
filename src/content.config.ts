@@ -11,6 +11,7 @@ const posts = defineCollection({
     draft: z.boolean().default(false),
     image: image().optional(),
     imageAlt: z.string().default(''),
+    titleModel: z.string().optional(),
   }),
 });
 export const collections = { posts };

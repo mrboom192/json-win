@@ -28,16 +28,33 @@ const { Content } = await render(post);
   </nav>
   <main class="post container">
     <article>
-      <header class:list={["post-header", { "with-image": post.data.image }]}>
+      <header
+        class:list={[
+          "post-header",
+          {
+            "with-image": post.data.image && !post.data.titleModel,
+            "with-model": post.data.titleModel,
+          },
+        ]}
+      >
         {
-          post.data.image && (
-            <Image
-              src={post.data.image}
-              alt={post.data.imageAlt}
-              width={440}
-              class="cover"
-              loading="eager"
-            />
+          post.data.titleModel ? (
+            <title-model-viewer
+              src={post.data.titleModel}
+              aria-label={`Interactive 3D model for ${post.data.title}`}
+            >
+              <a href={post.data.titleModel}>Download the 3D model</a>
+            </title-model-viewer>
+          ) : (
+            post.data.image && (
+              <Image
+                src={post.data.image}
+                alt={post.data.imageAlt}
+                width={440}
+                class="cover"
+                loading="eager"
+              />
+            )
           )
         }
         <div>
@@ -53,6 +70,10 @@ const { Content } = await render(post);
   </main>
 </Layout>
 <script>
+  if (document.querySelector("title-model-viewer")) {
+    void import("../../scripts/title-model-viewer");
+  }
+
   if (document.querySelector("wireframe-model-viewer")) {
     void import("../../scripts/wireframe-model-viewer");
   }
@@ -148,6 +169,16 @@ const { Content } = await render(post);
   .with-image {
     grid-template-columns: 220px minmax(0, 1fr);
   }
+  .with-model {
+    grid-template-columns: 15rem minmax(0, 1fr);
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+  title-model-viewer {
+    display: block;
+    width: 15rem;
+    height: 15rem;
+  }
   .cover {
     width: 100%;
     height: 220px;
@@ -164,6 +195,14 @@ const { Content } = await render(post);
     .with-image {
       grid-template-columns: 1fr;
       gap: 20px;
+    }
+    .post-header.with-model {
+      --mobile-model-size: 8rem;
+      grid-template-columns: var(--mobile-model-size) minmax(0, 1fr);
+    }
+    .with-model title-model-viewer {
+      width: var(--mobile-model-size);
+      height: var(--mobile-model-size);
     }
     .cover {
       width: 180px;

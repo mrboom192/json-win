@@ -3,6 +3,7 @@ title: Procedural terrain generation
 date: 2026-09-05
 description: A starting point for a new post.
 draft: false
+titleModel: /models/procedural-terrain-title.glb
 ---
 
 ## Intro
