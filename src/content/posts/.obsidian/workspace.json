@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Godot Shaders.md",
+                "file": "Procedural Terrain.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Godot Shaders"
+              "title": "Procedural Terrain"
             }
           }
         ]
@@ -187,9 +187,9 @@
   },
   "active": "3f6ea09fbed70595",
   "lastOpenFiles": [
+    "Godot Shaders.md",
     "Procedural Terrain.md",
     "template-post.md",
-    "Godot Shaders.md",
     "first-post.md",
     "math-render-test.md",
     "JSON.WIN.png",

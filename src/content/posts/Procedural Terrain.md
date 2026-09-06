@@ -14,9 +14,15 @@ In real life, terrain is shaped by natural processes such as tectonic activity a
 $$
 f: \mathbb{R}^n \to \mathbb{R}
 $$
-The idea is relatively simple: we start with a $XZ$ plane mesh with a high enough vertex count to represent the desired level of detail. For each vertex, we sample a noise function $f$ and displace that vertex in the $y$-direction by the sampled amount.
+The idea is relatively simple: we start with a $XZ$ plane mesh with a high enough vertex count to represent the desired level of detail. For each vertex, we sample a noise function $f$ and displace that vertex in the $y$-direction by the sampled amount. Godot lets us sample a noise function in C# with `GetNoise2D`. We define a `FastNoiseLite noise` variable and sample it at position `Vector3 v`.
 
-This gives us pretty believable looking terrain. If we wanted a bigger map, we could have the surface stretch out farther and also increase the number of vertices so that the resolution remains high. But we can only do this so much before we hit the first set of bottlenecks: **memory** and **generation time**. At some point, the surface will contain so many vertices that it consumes a significant amount of memory and, depending on the hardware, takes far too long to generate. Scaling our terrain this way makes it impractical for games, so we need another solution.
+```cs
+float displacement = noise.GetNoise2D(v.x, v.z);
+```
+
+We then use `displacement` to modify the vertex's y-coordinate. Repeating this for every vertex produces fairly believable-looking terrain.
+
+If we wanted a bigger map, we could have the surface stretch out farther and also increase the number of vertices so that the resolution remains high. But we can only do this so much before we hit the first set of bottlenecks: **memory** and **generation time**. At some point, the surface will contain so many vertices that it consumes a significant amount of memory and, depending on the hardware, takes far too long to generate. Scaling our terrain this way makes it impractical for games, so we need another solution.
 
 ## Level of detail
 
