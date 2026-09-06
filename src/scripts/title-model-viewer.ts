@@ -9,7 +9,11 @@ function disposeModel(model: THREE.Object3D) {
   const materials = new Set<THREE.Material>();
   const textures = new Set<THREE.Texture>();
   model.traverse((object) => {
-    if (!(object instanceof THREE.Mesh) && !(object instanceof THREE.LineSegments)) return;
+    if (
+      !(object instanceof THREE.Mesh) &&
+      !(object instanceof THREE.LineSegments)
+    )
+      return;
     geometries.add(object.geometry);
     for (const material of Array.isArray(object.material)
       ? object.material
@@ -250,8 +254,12 @@ class TitleModelViewer extends HTMLElement {
               }
               const edges = createQuadWireframe(geometry);
               geometry.dispose();
-              const material = new THREE.LineBasicMaterial({ color: 0x17221c, depthWrite: false });
-              const count = mesh instanceof THREE.InstancedMesh ? mesh.count : 1;
+              const material = new THREE.LineBasicMaterial({
+                color: 0x17221c,
+                depthWrite: false,
+              });
+              const count =
+                mesh instanceof THREE.InstancedMesh ? mesh.count : 1;
               for (let i = 0; i < count; i++) {
                 const overlay = new THREE.LineSegments(edges, material);
                 if (mesh instanceof THREE.InstancedMesh) {
@@ -261,7 +269,10 @@ class TitleModelViewer extends HTMLElement {
                 overlay.renderOrder = 1;
                 mesh.add(overlay);
               }
-              if (count === 0) { edges.dispose(); material.dispose(); }
+              if (count === 0) {
+                edges.dispose();
+                material.dispose();
+              }
               continue;
             }
             const overlay = mesh.clone(false);

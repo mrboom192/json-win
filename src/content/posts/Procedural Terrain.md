@@ -1,5 +1,5 @@
 ---
-title: Procedural terrain generation
+title: Procedural Terrain
 date: 2026-09-05
 description: A starting point for a new post.
 draft: false
@@ -22,7 +22,7 @@ $$
 f: \mathbb{R}^n \to \mathbb{R}
 $$
 
-The idea is relatively simple: we start with a $XZ$ plane mesh with a high enough vertex count to represent the desired level of detail. For each vertex, we sample a noise function $f$ and displace that vertex in the $y$-direction by the sampled amount. Godot lets us sample a noise function in C# with `GetNoise2D`. We define a `FastNoiseLite noise` variable and sample it at position `Vector3 v`.
+The idea is relatively simple: we start with a $XZ$ planar mesh with a high enough vertex count to represent the desired level of detail. For each vertex, we sample a noise function $f$ and displace that vertex in the $y$-direction by the sampled amount. Godot lets us sample a noise function in C# with `GetNoise2D`. We define a `FastNoiseLite noise` variable and sample it at position `Vector3 v`.
 
 ```cs
 float displacement = noise.GetNoise2D(v.x, v.z);
@@ -40,4 +40,4 @@ If we wanted a bigger map, we could have the surface stretch out farther and als
 
 The farther away something is, the less detail we can make out. This observation leads to an important optimization: we only need high-resolution terrain near the camera, while terrain farther away can be represented using fewer vertices. The most natural thing to do then is to have our terrain system generate more vertices the closer we are, and less vertices the farther we are. However, our current setup does not really generate anything; it only moves vertices around. If we were to implement LOD into our system, a more robust solution is desired.
 
-Let's imagine we had a system that could automatically generate plane meshes for any region we define, with a resolution of our choosing. Then the problem becomes much simpler: we just need a way to divide the terrain into chunks and decrease the resolution of those chunks as their distance from the viewer increases. A [quadtree](https://en.wikipedia.org/wiki/Quadtree) naturally handles this type of setup, especially for terrain generated using a heightmap. For our purposes, we'll be using an [octree](https://en.wikipedia.org/wiki/Octree), which can be thought of as an extension of the quadtree into 3D space.
+Let's imagine we had a system that could automatically generate planar meshes for any region we define, with a resolution of our choosing. Then the problem becomes much simpler: we just need a way to divide the terrain into chunks and decrease the resolution of those chunks as their distance from the viewer increases. A [quadtree](https://en.wikipedia.org/wiki/Quadtree) naturally handles this type of setup, especially for terrain generated using a heightmap. A similar data structure is the [octree](https://en.wikipedia.org/wiki/Octree), which can be thought of as an extension of the quadtree into 3D space. Going back to our requirements, we want to represent the world as a spherical planet. This already complicates a purely planar approach, although techniques such as mapping a cube onto a sphere to form a quadsphere could still be used. More importantly, heightmap-based terrain cannot represent features such as caves or overhangs because each $XZ$ coordinate gets assigned only 1 $y$-value. These constraints suggest that we need a volumetric representation of the terrain rather than a surface-based one. For this reason, I went with voxels to represent the world and an octree to spatially organize them.
