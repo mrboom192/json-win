@@ -4,11 +4,12 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 
 function disposeModel(model: THREE.Object3D) {
+  const geometries = new Set<THREE.BufferGeometry>();
   const materials = new Set<THREE.Material>();
   const textures = new Set<THREE.Texture>();
   model.traverse((object) => {
     if (!(object instanceof THREE.Mesh)) return;
-    object.geometry.dispose();
+    geometries.add(object.geometry);
     for (const material of Array.isArray(object.material)
       ? object.material
       : [object.material]) {
@@ -18,6 +19,7 @@ function disposeModel(model: THREE.Object3D) {
       }
     }
   });
+  geometries.forEach((geometry) => geometry.dispose());
   materials.forEach((material) => material.dispose());
   textures.forEach((texture) => texture.dispose());
 }
@@ -50,6 +52,16 @@ class TitleModelViewer extends HTMLElement {
     );
     const status = shadow.querySelector<HTMLElement>(".status")!;
     const src = this.getAttribute("src");
+    const rotation = Number(this.getAttribute("rotation") ?? 0);
+    const initialRotation = THREE.MathUtils.degToRad(
+      Number.isFinite(rotation) ? rotation : 0,
+    );
+    const zoom = Number(this.getAttribute("zoom") ?? 1);
+    const initialZoom =
+      Number.isFinite(zoom) && zoom > 0
+        ? THREE.MathUtils.clamp(zoom, 0.25, 4)
+        : 1;
+    const showWireframe = this.getAttribute("wireframe") === "true";
     if (!src) {
       status.textContent = "3D model source is missing.";
       return;
@@ -72,13 +84,26 @@ class TitleModelViewer extends HTMLElement {
     renderer.toneMappingExposure = 0.75;
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(8.5, 1, 0.01, 100);
-    camera.position.set(3, 0, 0);
+    // Match the previous framing at zoom 1, without perspective foreshortening.
+    const halfHeight = 0.5;
+    const camera = new THREE.OrthographicCamera(
+      -halfHeight,
+      halfHeight,
+      halfHeight,
+      -halfHeight,
+      0.01,
+      100,
+    );
+    camera.position.set(1, 1, 1).normalize().multiplyScalar(8);
+    camera.zoom = initialZoom;
+    camera.updateProjectionMatrix();
     const controls = new OrbitControls(camera, canvas);
     controls.enablePan = false;
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
     controls.zoomSpeed = 0.65;
+    controls.minZoom = 0.125;
+    controls.maxZoom = 8;
 
     // A soft studio environment supplies broad reflections without a visible backdrop.
     const pmrem = new THREE.PMREMGenerator(renderer);
@@ -188,9 +213,16 @@ class TitleModelViewer extends HTMLElement {
           return;
         }
         // Keep the GLB's colors and textures, adding only a modest surface sheen.
+        const meshes: THREE.Mesh[] = [];
         model.traverse((object) => {
           if (!(object instanceof THREE.Mesh)) return;
+          meshes.push(object);
           const polish = (material: THREE.Material) => {
+            if (showWireframe) {
+              material.polygonOffset = true;
+              material.polygonOffsetFactor = 1;
+              material.polygonOffsetUnits = 1;
+            }
             if (material instanceof THREE.MeshStandardMaterial) {
               material.roughness = 0.32;
               material.metalness = 0.08;
@@ -202,6 +234,24 @@ class TitleModelViewer extends HTMLElement {
             : [object.material]
           ).forEach(polish);
         });
+        // Add a second mesh pass, retaining the original shaded materials beneath it.
+        // Clone mesh types so skinning, morph targets, and instancing are preserved.
+        if (showWireframe) {
+          for (const mesh of meshes) {
+            const overlay = mesh.clone(false);
+            overlay.position.set(0, 0, 0);
+            overlay.quaternion.identity();
+            overlay.scale.set(1, 1, 1);
+            overlay.matrix.identity();
+            overlay.material = new THREE.MeshBasicMaterial({
+              color: 0x17221c,
+              wireframe: true,
+              depthWrite: false,
+            });
+            overlay.renderOrder = 1;
+            mesh.add(overlay);
+          }
+        }
         const bounds = new THREE.Box3().setFromObject(model);
         if (bounds.isEmpty()) {
           disposeModel(model);
@@ -216,15 +266,17 @@ class TitleModelViewer extends HTMLElement {
         // Normalize arbitrary export units and pivots so the hero always fits its square.
         pivot = new THREE.Group();
         model.position.sub(center);
-        pivot.add(model);
+        // Keep the authored orientation separate from the animated pointer tilt.
+        const orientation = new THREE.Group();
+        orientation.rotation.y = initialRotation;
+        orientation.add(model);
+        pivot.add(orientation);
         pivot.scale.setScalar(1 / radius);
         scene.add(pivot);
-        const distance =
-          1.08 / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2));
-        camera.position.set(1, 0.65, 1.4).normalize().multiplyScalar(distance);
+        camera.position.set(1, 0.65, 1.4).normalize().multiplyScalar(8);
+        camera.zoom = initialZoom;
+        camera.updateProjectionMatrix();
         controls.target.set(0, 0, 0);
-        controls.minDistance = 1.5;
-        controls.maxDistance = 8;
         controls.update();
         controls.saveState();
         status.hidden = true;
@@ -261,13 +313,14 @@ class TitleModelViewer extends HTMLElement {
       if (event.key === "ArrowRight") spherical.theta += 0.12;
       if (event.key === "ArrowUp") spherical.phi -= 0.12;
       if (event.key === "ArrowDown") spherical.phi += 0.12;
-      if (event.key === "+" || event.key === "=") spherical.radius *= 0.9;
-      if (event.key === "-") spherical.radius *= 1.1;
-      spherical.radius = THREE.MathUtils.clamp(
-        spherical.radius,
-        controls.minDistance,
-        controls.maxDistance,
+      if (event.key === "+" || event.key === "=") camera.zoom /= 0.9;
+      if (event.key === "-") camera.zoom /= 1.1;
+      camera.zoom = THREE.MathUtils.clamp(
+        camera.zoom,
+        controls.minZoom,
+        controls.maxZoom,
       );
+      camera.updateProjectionMatrix();
       spherical.makeSafe();
       camera.position
         .copy(controls.target)
@@ -280,7 +333,11 @@ class TitleModelViewer extends HTMLElement {
       const { width, height } = this.getBoundingClientRect();
       if (!width || !height) return;
       renderer.setSize(width, height, false);
-      camera.aspect = width / height;
+      const aspect = width / height;
+      camera.left = -halfHeight * aspect;
+      camera.right = halfHeight * aspect;
+      camera.top = halfHeight;
+      camera.bottom = -halfHeight;
       camera.updateProjectionMatrix();
       requestRender();
     });

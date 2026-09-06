@@ -1,5 +1,24 @@
 # Astro Starter Kit: Basics
 
+## Header 3D viewer
+
+The header model uses an orthographic camera. Configure it in a post's Markdown frontmatter:
+
+```yaml
+titleModel: /models/octree.glb
+titleModelRotation: 45
+titleModelZoom: 1.2
+titleModelWireframe: true
+```
+
+`titleModelRotation` rotates the centered model around its Y axis (left/right)
+in degrees. It defaults to `0`; use positive or negative values to turn it.
+`titleModelZoom` defaults to `1`; larger values zoom in and smaller values zoom
+out (supported range: `0.25`–`4`). `titleModelWireframe` defaults to `false`;
+set it to `true` to draw dark triangle edges over the shaded, textured model.
+These settings affect only the header viewer. Dragging and zooming still work,
+and the Home key resets the camera to the configured initial view.
+
 ```sh
 npm create astro@latest -- --template basics
 ```

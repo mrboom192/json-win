@@ -12,6 +12,9 @@ const posts = defineCollection({
     image: image().optional(),
     imageAlt: z.string().default(''),
     titleModel: z.string().optional(),
+    titleModelRotation: z.number().finite().default(0),
+    titleModelZoom: z.number().finite().min(0.25).max(4).default(1),
+    titleModelWireframe: z.boolean().default(false),
   }),
 });
 export const collections = { posts };
