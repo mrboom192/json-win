@@ -16,7 +16,7 @@ I'm currently working on a hobby game that needs to simulate an entire planet. G
 
 ## Faking terrain
 
-In real life, terrain is shaped by natural processes such as tectonic activity and erosion. To simulate these within the constraints of a real-time game is beyond my expertise. However, we can get close enough using some noise function A noise function returns a scalar value for any $n$-dimensional position:
+In real life, terrain is shaped by natural processes such as tectonic activity and erosion. To simulate these within the constraints of a real-time game is beyond my expertise. However, we can get close enough using some noise function. A noise function returns a scalar value for any $n$-dimensional position:
 
 $$
 f: \mathbb{R}^n \to \mathbb{R}
@@ -54,12 +54,12 @@ $$
 F(x, y, z) = 0.
 $$
 
-In other words, an implicit surface is the set of zeros of a function of three variables. To represent our planet, we'll use the implicit surface of a sphere defined by the [signed distance function](https://en.wikipedia.org/wiki/Signed_distance_function)
+In other words, an implicit surface is the set of zeroes of a function of three variables. To represent our planet, we'll use the implicit surface of a sphere defined by the [signed distance function](https://en.wikipedia.org/wiki/Signed_distance_function)
 
 $$
 f(p) = ||p|| - r
 $$
 
-where $r$ is the radius of the sphere and $p=(x,y,z)$ is a sample point in 3D space. You can think of it as a scalar field where points at surface have a value of $0$, points inside the sphere have negative values, and points outside the sphere have positive values.
+where $r$ is the radius of the sphere and $p=(x,y,z)$ is a sample point in 3D space. You can think of it as a scalar field where points at the surface have a value of $0$, points inside the sphere have negative values, and points outside the sphere have positive values.
 
 In order for this to be useful, we need a way to extract a polygonal mesh from the implicit surface. The most popular method is to use [marching cubes](https://en.wikipedia.org/wiki/Marching_cubes).
