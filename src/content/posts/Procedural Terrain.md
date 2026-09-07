@@ -78,8 +78,24 @@ for (var i = 0; i < corners.Length; i++)
 }
 ```
 
-`caseCode` is then used as a key in the lookup table to determine how to polgyonize that cell. The lookup tables for marching cubes can be found on Paul Bourke's [marching cubes article](https://paulbourke.net/geometry/polygonise/) or on Eric Lengyel's [transvoxels page](https://transvoxel.org).
+`caseCode` is then used as a key in the lookup table to determine how to polgyonize that cell. The lookup tables for marching cubes can be found on Paul Bourke's [marching cubes article](https://paulbourke.net/geometry/polygonise/) or on Eric Lengyel's [transvoxels page](https://transvoxel.org). When marching cubes is applied to our sphere SDF, we get a result similar to the one below.
 
-![Marching cubes equivalence classes](../../assets/images/marching-cubes-equivalence.png)
+<wireframe-model-viewer src="/models/mc-no-lerp.glb" aria-label="Interactive wireframe model of a plane displaced with noise" zoom="1.5" rotation="0 0 0" camera-position="-1 0.5 2" projection="orthographic" zoom-enabled="false" wireframe="true">
+  <a href="/models/mc-no-lerpglb">Download the 3D model</a>
+</wireframe-model-viewer>
 
-We can further improve the accuracy of marching cubes by using interpolation to estimate where the implicit surface intersects each active edge.
+Notice that the model is not perfectly smooth. Although the underlying scalar field represents a sphere, the generated mesh has noticeable "steps" caused by the finite sampling resolution. We can further improve the accuracy of marching cubes in two ways: increasing the **resolution** for our marching cubes implementation, or by using **[linear interpolation](https://en.wikipedia.org/wiki/Linear_interpolation)**. While increasing the resolution can produce a more detailed mesh, it also significantly increases the computational cost. Doubling the resolution of marching cubes along each axis increases the cost by approximately a factor of eight.
+
+Interpolation provides a much cheaper way to improve the placement of generated vertices without increasing the number of sampled cells. The goal is have the generated vertex closer to where the implicit surface intersects the active edge. The intersection point $\mathbf{p}$ can be found using
+
+$$
+\mathbf{p}=\mathbf{A} + \frac{I - a}{b - a}(\mathbf{B} - \mathbf{A})
+$$
+
+where $\mathbf{A}$ and $\mathbf{B}$ are the endpoints of the active edge, $a$ and $b$ are the sample values at the respective vertex, and $I$ is the iso-value (which in our case is 0). 
+
+Using interpolation places each generated vertex closer to the actual zero-crossing of the SDF, giving us a more accurate representation of the implicit surface. The sphere below was generated using marching cubes with linear interpolation.
+
+<wireframe-model-viewer src="/models/mc-sphere.glb" aria-label="Interactive wireframe model of a plane displaced with noise" zoom="1.5" rotation="0 0 0" camera-position="-1 0.5 2" projection="orthographic" zoom-enabled="false" wireframe="true">
+  <a href="/models/mc-sphere.glb">Download the 3D model</a>
+</wireframe-model-viewer>
