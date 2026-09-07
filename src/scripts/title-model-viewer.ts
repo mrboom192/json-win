@@ -3,12 +3,18 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { addWireframeOverlay, disposeModel } from "./model-viewer-utils";
-
+import { whenNearViewport } from "./viewer-visibility";
 
 class TitleModelViewer extends HTMLElement {
   private cleanup?: () => void;
+  private cancelInitialization?: () => void;
 
   connectedCallback() {
+    this.cancelInitialization?.();
+    this.cancelInitialization = whenNearViewport(this, () => this.initialize());
+  }
+
+  private initialize() {
     if (this.cleanup) return;
     const shadow = this.shadowRoot ?? this.attachShadow({ mode: "open" });
     shadow.innerHTML = `
@@ -258,13 +264,9 @@ class TitleModelViewer extends HTMLElement {
 
     const onKey = (event: KeyboardEvent) => {
       if (
-        ![
-          "ArrowLeft",
-          "ArrowRight",
-          "ArrowUp",
-          "ArrowDown",
-          "Home",
-        ].includes(event.key)
+        !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home"].includes(
+          event.key,
+        )
       )
         return;
       event.preventDefault();
@@ -326,6 +328,7 @@ class TitleModelViewer extends HTMLElement {
   }
 
   disconnectedCallback() {
+    this.cancelInitialization?.();
     this.cleanup?.();
     this.cleanup = undefined;
   }

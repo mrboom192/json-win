@@ -23,7 +23,15 @@ const {
     <link
       href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,600;1,400&display=swap"
       rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
     />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,600;1,400&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
   </head>

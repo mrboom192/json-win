@@ -139,6 +139,14 @@ h6 {
 .prose {
   overflow-wrap: anywhere;
 }
+/* Reserve the embed's final space before its JavaScript is loaded. */
+wireframe-model-viewer {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  margin: 30px auto;
+  overflow: hidden;
+}
 .prose h1,
 .prose h2,
 .prose h3,

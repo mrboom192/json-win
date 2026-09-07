@@ -1,7 +1,12 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { addWireframeOverlay, disposeModel, parseViewerVector } from "./model-viewer-utils";
+import {
+  addWireframeOverlay,
+  disposeModel,
+  parseViewerVector,
+} from "./model-viewer-utils";
+import { whenNearViewport } from "./viewer-visibility";
 
 class WireframeModelViewer extends HTMLElement {
   private animationFrame = 0;
@@ -12,8 +17,14 @@ class WireframeModelViewer extends HTMLElement {
   private controls?: OrbitControls;
   private isVisible = true;
   private cleanupKeys?: () => void;
+  private cancelInitialization?: () => void;
 
   connectedCallback() {
+    this.cancelInitialization?.();
+    this.cancelInitialization = whenNearViewport(this, () => this.initialize());
+  }
+
+  private initialize() {
     if (this.renderer) return;
 
     const shadow = this.shadowRoot ?? this.attachShadow({ mode: "open" });
@@ -55,24 +66,36 @@ class WireframeModelViewer extends HTMLElement {
       return;
     }
     const zoomEnabled = this.getAttribute("zoom-enabled") !== "false";
-    canvas.setAttribute("aria-label", `${this.getAttribute("aria-label") ?? "Interactive 3D model"}. Drag or use arrow keys to rotate. ${zoomEnabled ? "Scroll, pinch, or use plus and minus to zoom. " : ""}Home resets.`);
+    canvas.setAttribute(
+      "aria-label",
+      `${this.getAttribute("aria-label") ?? "Interactive 3D model"}. Drag or use arrow keys to rotate. ${zoomEnabled ? "Scroll, pinch, or use plus and minus to zoom. " : ""}Home resets.`,
+    );
     const rotationValue = this.getAttribute("rotation");
     const yaw = Number(rotationValue ?? 0);
     // A single number remains shorthand for Y rotation on existing embeds.
-    const rotation = parseViewerVector(rotationValue,
-      new THREE.Vector3(0, Number.isFinite(yaw) ? yaw : 0, 0));
-    const defaultCameraPosition = new THREE.Vector3(1, 1, 1).normalize()
+    const rotation = parseViewerVector(
+      rotationValue,
+      new THREE.Vector3(0, Number.isFinite(yaw) ? yaw : 0, 0),
+    );
+    const defaultCameraPosition = new THREE.Vector3(1, 1, 1)
+      .normalize()
       .multiplyScalar(1.15 / Math.sin(THREE.MathUtils.degToRad(40 / 1.5)));
     const initialCameraPosition = parseViewerVector(
-      this.getAttribute("camera-position"), defaultCameraPosition,
+      this.getAttribute("camera-position"),
+      defaultCameraPosition,
     );
     // The camera must be away from its target to define a viewing direction.
-    if (!Number.isFinite(initialCameraPosition.length()) || initialCameraPosition.length() < 0.001) {
+    if (
+      !Number.isFinite(initialCameraPosition.length()) ||
+      initialCameraPosition.length() < 0.001
+    ) {
       initialCameraPosition.copy(defaultCameraPosition);
     }
     const zoom = Number(this.getAttribute("zoom") ?? 1);
-    const initialZoom = Number.isFinite(zoom) && zoom > 0
-      ? THREE.MathUtils.clamp(zoom, 0.25, 4) : 1;
+    const initialZoom =
+      Number.isFinite(zoom) && zoom > 0
+        ? THREE.MathUtils.clamp(zoom, 0.25, 4)
+        : 1;
     // Preserve existing wireframe-only embeds; explicit true adds a shaded surface.
     const wireframe = this.getAttribute("wireframe") ?? "only";
     const orthographic = this.getAttribute("projection") === "orthographic";
@@ -92,11 +115,17 @@ class WireframeModelViewer extends HTMLElement {
       } else camera.aspect = aspect;
       camera.updateProjectionMatrix();
     };
-    const renderer = new THREE.WebGLRenderer({
-      canvas,
-      alpha: true,
-      antialias: true,
-    });
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        canvas,
+        alpha: true,
+        antialias: true,
+      });
+    } catch {
+      status.textContent = "3D preview is unavailable in this browser.";
+      return;
+    }
     renderer.setClearColor(0x000000, 0);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
@@ -115,6 +144,28 @@ class WireframeModelViewer extends HTMLElement {
     this.renderer = renderer;
     this.controls = controls;
 
+    // Static scenes need frames only while controls change or damping settles.
+    const requestRender = () => {
+      if (
+        !this.animationFrame &&
+        this.isVisible &&
+        !document.hidden &&
+        this.renderer === renderer
+      ) {
+        this.animationFrame = requestAnimationFrame(render);
+      }
+    };
+    const render = () => {
+      this.animationFrame = 0;
+      if (!this.isVisible || document.hidden || this.renderer !== renderer)
+        return;
+      const moving = controls.update();
+      renderer.render(scene, camera);
+      if (moving) requestRender();
+    };
+    controls.addEventListener("change", requestRender);
+    document.addEventListener("visibilitychange", requestRender);
+
     new GLTFLoader().load(
       src,
       ({ scene: model }) => {
@@ -126,7 +177,9 @@ class WireframeModelViewer extends HTMLElement {
         model.traverse((object) => {
           if (object instanceof THREE.Mesh) {
             meshes.push(object);
-            const materials = Array.isArray(object.material) ? object.material : [object.material];
+            const materials = Array.isArray(object.material)
+              ? object.material
+              : [object.material];
             for (const material of materials) {
               if (wireframe === "only") material.visible = false;
               if (wireframe === "true") {
@@ -139,7 +192,11 @@ class WireframeModelViewer extends HTMLElement {
         });
         if (wireframe === "true" || wireframe === "only") {
           for (const mesh of meshes) {
-            addWireframeOverlay(mesh, this.getAttribute("wireframe-style"), wireframe === "only");
+            addWireframeOverlay(
+              mesh,
+              this.getAttribute("wireframe-style"),
+              wireframe === "only",
+            );
           }
         }
 
@@ -163,26 +220,39 @@ class WireframeModelViewer extends HTMLElement {
         scene.add(orientation);
 
         const radius = Math.max(sphere.radius, 0.01);
-        const distance =
-          radius / Math.sin(THREE.MathUtils.degToRad(40 / 1.5));
+        const distance = radius / Math.sin(THREE.MathUtils.degToRad(40 / 1.5));
         camera.position
           .copy(initialCameraPosition)
           .multiplyScalar(radius / (orthographic ? 1 : initialZoom));
         halfHeight = distance * 1.15 * Math.tan(THREE.MathUtils.degToRad(20));
         if (orthographic) camera.zoom = initialZoom;
-        camera.near = Math.min(Math.max(radius / 100, 0.001), camera.position.length() / 10);
-        camera.far = Math.max(radius * 100, camera.position.length() * 2 + radius * 12);
+        camera.near = Math.min(
+          Math.max(radius / 100, 0.001),
+          camera.position.length() / 10,
+        );
+        camera.far = Math.max(
+          radius * 100,
+          camera.position.length() * 2 + radius * 12,
+        );
         updateProjection();
         controls.target.set(0, 0, 0);
-        controls.minDistance = Math.min(radius * 0.35, camera.position.length());
-        controls.maxDistance = Math.max(radius * 12, camera.position.length() * 2);
+        controls.minDistance = Math.min(
+          radius * 0.35,
+          camera.position.length(),
+        );
+        controls.maxDistance = Math.max(
+          radius * 12,
+          camera.position.length() * 2,
+        );
         controls.update();
         controls.saveState();
         status.hidden = true;
+        requestRender();
       },
       undefined,
       () => {
-        if (this.scene === scene) status.textContent = "Unable to load the 3D model.";
+        if (this.scene === scene)
+          status.textContent = "Unable to load the 3D model.";
       },
     );
 
@@ -192,50 +262,81 @@ class WireframeModelViewer extends HTMLElement {
       renderer.setSize(width, height, false);
       aspect = width / height;
       updateProjection();
+      requestRender();
     });
     this.resizeObserver.observe(this);
 
     this.intersectionObserver = new IntersectionObserver(([entry]) => {
       this.isVisible = entry?.isIntersecting ?? true;
+      requestRender();
     });
     this.intersectionObserver.observe(this);
 
     const onKey = (event: KeyboardEvent) => {
       if (!zoomEnabled && ["+", "=", "-"].includes(event.key)) return;
-      if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "+", "=", "-", "Home"].includes(event.key)) return;
+      if (
+        ![
+          "ArrowLeft",
+          "ArrowRight",
+          "ArrowUp",
+          "ArrowDown",
+          "+",
+          "=",
+          "-",
+          "Home",
+        ].includes(event.key)
+      )
+        return;
       event.preventDefault();
-      if (event.key === "Home") { controls.reset(); return; }
+      if (event.key === "Home") {
+        controls.reset();
+        return;
+      }
       const offset = camera.position.clone().sub(controls.target);
       const spherical = new THREE.Spherical().setFromVector3(offset);
       if (event.key === "ArrowLeft") spherical.theta -= 0.12;
       if (event.key === "ArrowRight") spherical.theta += 0.12;
       if (event.key === "ArrowUp") spherical.phi -= 0.12;
       if (event.key === "ArrowDown") spherical.phi += 0.12;
-      const factor = event.key === "+" || event.key === "=" ? 0.9 : event.key === "-" ? 1.1 : 1;
+      const factor =
+        event.key === "+" || event.key === "="
+          ? 0.9
+          : event.key === "-"
+            ? 1.1
+            : 1;
       if (orthographic) {
-        camera.zoom = THREE.MathUtils.clamp(camera.zoom / factor, controls.minZoom, controls.maxZoom);
+        camera.zoom = THREE.MathUtils.clamp(
+          camera.zoom / factor,
+          controls.minZoom,
+          controls.maxZoom,
+        );
         updateProjection();
       } else {
-        spherical.radius = THREE.MathUtils.clamp(spherical.radius * factor, controls.minDistance, controls.maxDistance);
+        spherical.radius = THREE.MathUtils.clamp(
+          spherical.radius * factor,
+          controls.minDistance,
+          controls.maxDistance,
+        );
       }
       spherical.makeSafe();
-      camera.position.copy(controls.target).add(offset.setFromSpherical(spherical));
+      camera.position
+        .copy(controls.target)
+        .add(offset.setFromSpherical(spherical));
       controls.update();
     };
     canvas.addEventListener("keydown", onKey);
-    this.cleanupKeys = () => canvas.removeEventListener("keydown", onKey);
-
-    const render = () => {
-      this.animationFrame = requestAnimationFrame(render);
-      if (!this.isVisible) return;
-      controls.update();
-      renderer.render(scene, camera);
+    this.cleanupKeys = () => {
+      canvas.removeEventListener("keydown", onKey);
+      controls.removeEventListener("change", requestRender);
+      document.removeEventListener("visibilitychange", requestRender);
     };
-    render();
+    requestRender();
   }
 
   disconnectedCallback() {
+    this.cancelInitialization?.();
     cancelAnimationFrame(this.animationFrame);
+    this.animationFrame = 0;
     this.resizeObserver?.disconnect();
     this.intersectionObserver?.disconnect();
     this.controls?.dispose();
