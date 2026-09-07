@@ -28,9 +28,9 @@ The idea is relatively simple: we start with a $XZ$ planar mesh with a high enou
 float displacement = noise.GetNoise2D(v.x, v.z);
 ```
 
-We then use `displacement` to modify the vertex's y-coordinate. Repeating this for every vertex produces fairly believable-looking terrain.
+We then use `displacement` to modify the vertex's y-coordinate. Repeating this for every vertex produces fairly believable-looking terrain. This article from [Red Blob Games](https://www.redblobgames.com/maps/terrain-from-noise/) is a good source if you want to learn more about making terrain this way.
 
-<wireframe-model-viewer src="/models/plane-noise-simple.glb" aria-label="Interactive wireframe model of a plane displaced with noise">
+<wireframe-model-viewer src="/models/plane-noise-simple.glb" aria-label="Interactive wireframe model of a plane displaced with noise" zoom="1.5" rotation="-10 0 0" camera-position="0 0 0" projection="orthographic">
   <a href="/models/plane-noise-simple.glb">Download the 3D model</a>
 </wireframe-model-viewer>
 
@@ -42,18 +42,24 @@ The farther away something is, the less detail we can make out. This observation
 
 Let's imagine we had a system that could automatically generate planar meshes for any region we define, with a resolution of our choosing. Then the problem becomes much simpler: we just need a way to divide the terrain into chunks and decrease the resolution of those chunks as their distance from the viewer increases. A [quadtree](https://en.wikipedia.org/wiki/Quadtree) naturally handles this type of setup, especially for terrain generated using a heightmap. A similar data structure is the [octree](https://en.wikipedia.org/wiki/Octree), which can be thought of as an extension of the quadtree into 3D space. Each of these are tree data structures with 4 and 8 children respectively.
 
+![A quadtree](../../assets/images/quadtree.png)
+
 Going back to our requirements, we want to represent the world as a spherical planet. This already complicates a purely planar approach, although techniques such as mapping a cube onto a sphere to form a quadsphere could still be used. More importantly, heightmap-based terrain cannot represent features such as caves or overhangs because each $XZ$ coordinate gets assigned only 1 $y$-value. These constraints suggest that we need a volumetric representation of the terrain rather than a surface-based one. For this reason, I went with voxels to represent the world and an octree to spatially organize them.
 
 ## Implicit surfaces
 
 An implicit surface is defined as a surface in Euclidean space defined by an equation
+
 $$
 F(x, y, z) = 0.
 $$
-In other words, an implicit surface is the set of zeros of a function of three variables. To represent our planet, we'll use the implicit surface of a sphere defined by the [signed distance function](https://en.wikipedia.org/wiki/Signed_distance_function) 
+
+In other words, an implicit surface is the set of zeros of a function of three variables. To represent our planet, we'll use the implicit surface of a sphere defined by the [signed distance function](https://en.wikipedia.org/wiki/Signed_distance_function)
+
 $$
 f(p) = ||p|| - r
 $$
+
 where $r$ is the radius of the sphere and $p=(x,y,z)$ is a sample point in 3D space. You can think of it as a scalar field where points at surface have a value of $0$, points inside the sphere have negative values, and points outside the sphere have positive values.
 
 In order for this to be useful, we need a way to extract a polygonal mesh from the implicit surface. The most popular method is to use [marching cubes](https://en.wikipedia.org/wiki/Marching_cubes).

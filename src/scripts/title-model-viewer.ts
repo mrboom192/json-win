@@ -2,32 +2,8 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
-import { createQuadWireframe } from "./quad-wireframe";
+import { addWireframeOverlay, disposeModel } from "./model-viewer-utils";
 
-function disposeModel(model: THREE.Object3D) {
-  const geometries = new Set<THREE.BufferGeometry>();
-  const materials = new Set<THREE.Material>();
-  const textures = new Set<THREE.Texture>();
-  model.traverse((object) => {
-    if (
-      !(object instanceof THREE.Mesh) &&
-      !(object instanceof THREE.LineSegments)
-    )
-      return;
-    geometries.add(object.geometry);
-    for (const material of Array.isArray(object.material)
-      ? object.material
-      : [object.material]) {
-      materials.add(material);
-      for (const value of Object.values(material)) {
-        if (value instanceof THREE.Texture) textures.add(value);
-      }
-    }
-  });
-  geometries.forEach((geometry) => geometry.dispose());
-  materials.forEach((material) => material.dispose());
-  textures.forEach((texture) => texture.dispose());
-}
 
 class TitleModelViewer extends HTMLElement {
   private cleanup?: () => void;
@@ -47,7 +23,7 @@ class TitleModelViewer extends HTMLElement {
         .instructions { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
       </style>
       <canvas tabindex="0" role="group" aria-roledescription="3D viewer" aria-describedby="instructions"></canvas>
-      <span id="instructions" class="instructions">Drag to rotate. Scroll or pinch to zoom. Use arrow keys to rotate, plus and minus to zoom, and Home to reset.</span>
+      <span id="instructions" class="instructions">Drag or use arrow keys to rotate. Use Home to reset.</span>
       <div class="status" role="status">Loading 3D model…</div>
     `;
     const canvas = shadow.querySelector("canvas")!;
@@ -104,11 +80,9 @@ class TitleModelViewer extends HTMLElement {
     camera.updateProjectionMatrix();
     const controls = new OrbitControls(camera, canvas);
     controls.enablePan = false;
+    controls.enableZoom = false;
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
-    controls.zoomSpeed = 0.65;
-    controls.minZoom = 0.125;
-    controls.maxZoom = 8;
 
     // A soft studio environment supplies broad reflections without a visible backdrop.
     const pmrem = new THREE.PMREMGenerator(renderer);
@@ -243,50 +217,7 @@ class TitleModelViewer extends HTMLElement {
         // Clone mesh types so skinning, morph targets, and instancing are preserved.
         if (showWireframe) {
           for (const mesh of meshes) {
-            if (this.getAttribute("wireframe-style") === "quads") {
-              // Bake the displayed pose so the lines also align with skinned/morphed meshes.
-              const geometry = mesh.geometry.clone();
-              const position = geometry.getAttribute("position");
-              const vertex = new THREE.Vector3();
-              for (let i = 0; i < position.count; i++) {
-                mesh.getVertexPosition(i, vertex);
-                position.setXYZ(i, vertex.x, vertex.y, vertex.z);
-              }
-              const edges = createQuadWireframe(geometry);
-              geometry.dispose();
-              const material = new THREE.LineBasicMaterial({
-                color: 0x17221c,
-                depthWrite: false,
-              });
-              const count =
-                mesh instanceof THREE.InstancedMesh ? mesh.count : 1;
-              for (let i = 0; i < count; i++) {
-                const overlay = new THREE.LineSegments(edges, material);
-                if (mesh instanceof THREE.InstancedMesh) {
-                  mesh.getMatrixAt(i, overlay.matrix);
-                  overlay.matrixAutoUpdate = false;
-                }
-                overlay.renderOrder = 1;
-                mesh.add(overlay);
-              }
-              if (count === 0) {
-                edges.dispose();
-                material.dispose();
-              }
-              continue;
-            }
-            const overlay = mesh.clone(false);
-            overlay.position.set(0, 0, 0);
-            overlay.quaternion.identity();
-            overlay.scale.set(1, 1, 1);
-            overlay.matrix.identity();
-            overlay.material = new THREE.MeshBasicMaterial({
-              color: 0x17221c,
-              wireframe: true,
-              depthWrite: false,
-            });
-            overlay.renderOrder = 1;
-            mesh.add(overlay);
+            addWireframeOverlay(mesh, this.getAttribute("wireframe-style"));
           }
         }
         const bounds = new THREE.Box3().setFromObject(model);
@@ -332,9 +263,6 @@ class TitleModelViewer extends HTMLElement {
           "ArrowRight",
           "ArrowUp",
           "ArrowDown",
-          "+",
-          "=",
-          "-",
           "Home",
         ].includes(event.key)
       )
@@ -350,14 +278,6 @@ class TitleModelViewer extends HTMLElement {
       if (event.key === "ArrowRight") spherical.theta += 0.12;
       if (event.key === "ArrowUp") spherical.phi -= 0.12;
       if (event.key === "ArrowDown") spherical.phi += 0.12;
-      if (event.key === "+" || event.key === "=") camera.zoom /= 0.9;
-      if (event.key === "-") camera.zoom /= 1.1;
-      camera.zoom = THREE.MathUtils.clamp(
-        camera.zoom,
-        controls.minZoom,
-        controls.maxZoom,
-      );
-      camera.updateProjectionMatrix();
       spherical.makeSafe();
       camera.position
         .copy(controls.target)
