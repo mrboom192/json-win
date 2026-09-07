@@ -40,4 +40,20 @@ If we wanted a bigger map, we could have the surface stretch out farther and als
 
 The farther away something is, the less detail we can make out. This observation leads to an important optimization: we only need high-resolution terrain near the camera, while terrain farther away can be represented using fewer vertices. The most natural thing to do then is to have our terrain system generate more vertices the closer we are, and less vertices the farther we are. However, our current setup does not really generate anything; it only moves vertices around. If we were to implement LOD into our system, a more robust solution is desired.
 
-Let's imagine we had a system that could automatically generate planar meshes for any region we define, with a resolution of our choosing. Then the problem becomes much simpler: we just need a way to divide the terrain into chunks and decrease the resolution of those chunks as their distance from the viewer increases. A [quadtree](https://en.wikipedia.org/wiki/Quadtree) naturally handles this type of setup, especially for terrain generated using a heightmap. A similar data structure is the [octree](https://en.wikipedia.org/wiki/Octree), which can be thought of as an extension of the quadtree into 3D space. Going back to our requirements, we want to represent the world as a spherical planet. This already complicates a purely planar approach, although techniques such as mapping a cube onto a sphere to form a quadsphere could still be used. More importantly, heightmap-based terrain cannot represent features such as caves or overhangs because each $XZ$ coordinate gets assigned only 1 $y$-value. These constraints suggest that we need a volumetric representation of the terrain rather than a surface-based one. For this reason, I went with voxels to represent the world and an octree to spatially organize them.
+Let's imagine we had a system that could automatically generate planar meshes for any region we define, with a resolution of our choosing. Then the problem becomes much simpler: we just need a way to divide the terrain into chunks and decrease the resolution of those chunks as their distance from the viewer increases. A [quadtree](https://en.wikipedia.org/wiki/Quadtree) naturally handles this type of setup, especially for terrain generated using a heightmap. A similar data structure is the [octree](https://en.wikipedia.org/wiki/Octree), which can be thought of as an extension of the quadtree into 3D space. Each of these are tree data structures with 4 and 8 children respectively.
+
+Going back to our requirements, we want to represent the world as a spherical planet. This already complicates a purely planar approach, although techniques such as mapping a cube onto a sphere to form a quadsphere could still be used. More importantly, heightmap-based terrain cannot represent features such as caves or overhangs because each $XZ$ coordinate gets assigned only 1 $y$-value. These constraints suggest that we need a volumetric representation of the terrain rather than a surface-based one. For this reason, I went with voxels to represent the world and an octree to spatially organize them.
+
+## Implicit surfaces
+
+An implicit surface is defined as a surface in Euclidean space defined by an equation
+$$
+F(x, y, z) = 0.
+$$
+In other words, an implicit surface is the set of zeros of a function of three variables. To represent our planet, we'll use the implicit surface of a sphere defined by the [signed distance function](https://en.wikipedia.org/wiki/Signed_distance_function) 
+$$
+f(p) = ||p|| - r
+$$
+where $r$ is the radius of the sphere and $p=(x,y,z)$ is a sample point in 3D space. You can think of it as a scalar field where points at surface have a value of $0$, points inside the sphere have negative values, and points outside the sphere have positive values.
+
+In order for this to be useful, we need a way to extract a polygonal mesh from the implicit surface. The most popular method is to use [marching cubes](https://en.wikipedia.org/wiki/Marching_cubes).
