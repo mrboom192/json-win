@@ -12,7 +12,7 @@ titleModelWireframeStyle: quads
 
 ## Intro
 
-I'm currently working on a hobby game that needs to simulate an entire planet. Games like [No Man's Sky](https://www.nomanssky.com/) and [Kerbal Space Program](https://store.steampowered.com/app/220200/Kerbal_Space_Program/) generate an entire planet, so I looked up to these games when developing my procedural terrain system. At minimum, I would want the planet to be pretty big (maybe even Earth sized), be fully destructible, and be able to run on most hardware. These minimum requirements alone drove me into weeks long journey on terrain generation.
+I'm currently working on a hobby game that needs to simulate an entire planet. Games like [No Man's Sky](https://www.nomanssky.com/) and [Kerbal Space Program](https://store.steampowered.com/app/220200/Kerbal_Space_Program/) generate an entire planet, so I looked up to these games when developing my procedural terrain system. At minimum, I would want the planet to be pretty big (maybe even Earth sized), be fully destructible, and be able to run on most hardware. These minimum requirements alone drove me into weeks long journey on terrain generation. Many of the ideas here were derived from Eric Lengyel's [transvoxel paper](https://transvoxel.org/).
 
 ## Faking terrain
 
@@ -63,3 +63,23 @@ $$
 where $r$ is the radius of the sphere and $p=(x,y,z)$ is a sample point in 3D space. You can think of it as a scalar field where points at the surface have a value of $0$, points inside the sphere have negative values, and points outside the sphere have positive values.
 
 In order for this to be useful, we need a way to extract a polygonal mesh from the implicit surface. The most popular method is to use [marching cubes](https://en.wikipedia.org/wiki/Marching_cubes).
+
+Marching Cubes works by dividing the world into cubic cells and sampling each corner of every cube. This gives each corner a binary classification, so each cell has $2^8 = 256$ possible configurations. The eight classifications can be combined into an 8-bit key, which is used to look up the corresponding mesh configuration for that cell. 
+
+The code snippet below samples each corner of a cell and constructs the lookup key, `caseCode`. Each corner corresponds to one bit in the key. If the sampled value is below the isovalue, that bit is set to `1`; otherwise, it remains `0`.
+
+```csharp
+for (var i = 0; i < corners.Length; i++)
+{
+	var corner = minCorner + CornerOffsets[i] * step;
+	corners[i] = Sample.GetSignedDistance(corner);
+
+	caseCode |= (corners[i] < IsoValue ? 1 : 0) << i;
+}
+```
+
+`caseCode` is then used as a key in the lookup table to determine how to polgyonize that cell. The lookup tables for marching cubes can be found on Paul Bourke's [marching cubes article](https://paulbourke.net/geometry/polygonise/) or on Eric Lengyel's [transvoxels page](https://transvoxel.org).
+
+![Marching cubes equivalence classes](../../assets/images/marching-cubes-equivalence.png)
+
+We can further improve the accuracy of marching cubes by using interpolation to estimate where the implicit surface intersects each active edge.
