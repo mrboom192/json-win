@@ -30,7 +30,7 @@ float displacement = noise.GetNoise2D(v.x, v.z);
 
 We then use `displacement` to modify the vertex's y-coordinate. Repeating this for every vertex produces fairly believable-looking terrain. This article from [Red Blob Games](https://www.redblobgames.com/maps/terrain-from-noise/) is a good source if you want to learn more about making terrain this way.
 
-<wireframe-model-viewer src="/models/plane-noise-simple.glb" aria-label="Interactive wireframe model of a plane displaced with noise" zoom="1.5" rotation="-10 0 0" camera-position="0 0 0" projection="orthographic">
+<wireframe-model-viewer src="/models/plane-noise-simple.glb" aria-label="Interactive wireframe model of a plane displaced with noise" zoom="1.5" rotation="-10 0 0" camera-position="0 0 0" projection="orthographic" zoom-enabled="false">
   <a href="/models/plane-noise-simple.glb">Download the 3D model</a>
 </wireframe-model-viewer>
 

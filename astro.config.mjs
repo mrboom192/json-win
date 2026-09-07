@@ -8,7 +8,10 @@ import cloudflare from "@astrojs/cloudflare";
 
 // https://astro.build/config
 export default defineConfig({
-  adapter: cloudflare(),
+  adapter: cloudflare({
+    // Generate static images for prerendered pages during the build.
+    imageService: "compile",
+  }),
   markdown: {
     shikiConfig: {
       theme: "ayu-light",
