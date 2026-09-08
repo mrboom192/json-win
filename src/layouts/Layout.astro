@@ -38,6 +38,7 @@ const {
     <title>{title}</title>
   </head>
   <body class:list={{ "post-themed": color }} style={color ? { "--post-color": color } : undefined}>
+    {color && <div class="post-top-gradient" aria-hidden="true"></div>}
     <slot />
   </body>
 </html>

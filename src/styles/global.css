@@ -233,8 +233,27 @@ wireframe-model-viewer {
   margin: 40px 0;
 }
 
-/* Blend the post color over the existing grid; white page areas stay white. */
-body.post-themed { isolation: isolate; }
+/* Keep the color wash above the grid's overlay blend so it isn't washed out. */
+body.post-themed {
+  isolation: isolate;
+}
+.post-top-gradient {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 360px;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--post-color) 65%, transparent) 0%,
+    color-mix(in srgb, var(--post-color) 25%, transparent) 45%,
+    transparent 100%
+  );
+  mix-blend-mode: add;
+}
+body.post-themed > main {
+  z-index: 2;
+}
 body.post-themed::after {
   content: "";
   position: absolute;
@@ -242,6 +261,5 @@ body.post-themed::after {
   height: 240px;
   z-index: 0;
   pointer-events: none;
-  background: var(--post-color);
   mix-blend-mode: overlay;
 }

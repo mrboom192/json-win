@@ -17,6 +17,7 @@ const { Content } = await render(post);
 ---
 
 <Layout
+  color={post.data.color}
   title={`${post.data.title} | Jason Nguyen`}
   description={post.data.description ?? post.data.title}
 >
