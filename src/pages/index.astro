@@ -116,17 +116,21 @@ const posts = (await getCollection("posts", ({ data }) => !data.draft)).sort(
     position: relative;
   }
   .post-number {
-    position: absolute;
-    bottom: 1rem;
-    left: 1rem;
+    grid-area: number;
+    align-self: end;
   }
   .post-card {
     position: relative;
     isolation: isolate;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "copy copy copy"
+      "number model model";
+    grid-template-rows: auto 1fr;
     overflow: hidden;
+
+    height: 100%;
     padding: 1rem;
 
     background: var(--post-color);
@@ -153,6 +157,8 @@ const posts = (await getCollection("posts", ({ data }) => !data.draft)).sort(
   }
 
   .card-copy {
+    grid-area: copy;
+    min-width: 0;
     position: relative;
     z-index: 1;
   }
@@ -169,7 +175,8 @@ const posts = (await getCollection("posts", ({ data }) => !data.draft)).sort(
     font-size: 0.75rem;
   }
   .card-model {
-    width: 55%;
+    grid-area: model;
+    width: 65%;
     aspect-ratio: 1;
     margin: auto -0.25rem -0.75rem auto;
     pointer-events: none;
@@ -191,7 +198,7 @@ const posts = (await getCollection("posts", ({ data }) => !data.draft)).sort(
   }
   @media (max-width: 900px) {
     .post-number {
-      top: 1rem;
+      align-self: start;
     }
 
     .post-grid {
@@ -199,30 +206,26 @@ const posts = (await getCollection("posts", ({ data }) => !data.draft)).sort(
     }
 
     .post-card {
-      display: flex;
-      flex-direction: row;
+      grid-template-columns: auto minmax(0, 2fr) minmax(0, 1fr);
+      grid-template-areas: "number copy model";
+      grid-template-rows: 1fr;
       gap: 1rem;
-      padding-left: 4rem;
 
-      height: 10rem;
-    }
-
-    .card-copy {
-      width: 50%;
+      min-height: 9rem;
     }
 
     .card-model {
       position: absolute;
-      right: -10%;
+      right: -70%;
       top: 50%;
       transform: translateY(-25%);
 
-      width: 50%;
+      width: 200%;
       aspect-ratio: 1;
     }
 
     .post-card:hover .card-model {
-      transform: translateY(-25%) translateX(-5%) scale(1.1);
+      transform: translateX(-5%) scale(1.1);
     }
   }
   @media (max-width: 480px) {
@@ -230,7 +233,6 @@ const posts = (await getCollection("posts", ({ data }) => !data.draft)).sort(
       gap: 0.75rem;
     }
     .post-card {
-      min-height: 19rem;
       padding: 1rem;
     }
     h3 {
