@@ -1,10 +1,11 @@
 ---
 title: Shaders in Godot
 date: 2026-02-05
-description: A starting point for a new post.
+description: An exploration of shaders in Godot.
+color: "#DCB0F2"
 draft: false
 ---
 
 ## Intro
 
-Spatial shaders are used for shading 3D objects in Godot. 
+Spatial shaders are used for shading 3D objects in Godot.

@@ -21,7 +21,7 @@ set it to `true` to draw dark triangle edges over the shaded, textured model.
 The quad style hides the shared diagonal of near-coplanar triangle pairs while
 preserving grid edges. GLB files contain triangles, so this is an approximation:
 unmatched triangles and curved faces may still show triangle edges.
-These settings affect only the header viewer. Dragging and arrow keys rotate;
+These settings affect the header viewer and home card preview. Dragging and arrow keys rotate;
 Home resets the camera to the configured initial view. Interactive zoom is
 disabled; `titleModelZoom` still sets the initial framing.
 
@@ -111,3 +111,12 @@ All commands are run from the root of the project, from a terminal:
 ## 👀 Want to learn more?
 
 Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+
+### Post cards and colors
+
+Set `color: "#167a78"` in a post's frontmatter (a quoted 3- or 6-digit hex color).
+It controls the home card's color-to-dark gradient and the post page's overlay grid tint.
+Omitting it uses teal. Cards show `title`, optional `description`, and optional `titleModel`,
+including the existing rotation, zoom, and wireframe settings. Card models are decorative;
+hovering or focusing the card enlarges the preview, with reduced-motion preferences respected.
+The home grid has four columns above 900px and two columns at smaller widths.

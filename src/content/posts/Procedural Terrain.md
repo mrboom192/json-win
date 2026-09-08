@@ -1,7 +1,8 @@
 ---
 title: Procedural Terrain
 date: 2026-09-05
-description: A starting point for a new post.
+description: Generating procedural terrain using marching cubes, octrees, and noise.
+color: "#F6CF71"
 draft: false
 titleModel: /models/octree.glb
 titleModelZoom: 0.5
@@ -64,7 +65,7 @@ where $r$ is the radius of the sphere and $p=(x,y,z)$ is a sample point in 3D sp
 
 In order for this to be useful, we need a way to extract a polygonal mesh from the implicit surface. The most popular method is to use [marching cubes](https://en.wikipedia.org/wiki/Marching_cubes).
 
-Marching Cubes works by dividing the world into cubic cells and sampling each corner of every cube. This gives each corner a binary classification, so each cell has $2^8 = 256$ possible configurations. The eight classifications can be combined into an 8-bit key, which is used to look up the corresponding mesh configuration for that cell. 
+Marching Cubes works by dividing the world into cubic cells and sampling each corner of every cube. This gives each corner a binary classification, so each cell has $2^8 = 256$ possible configurations. The eight classifications can be combined into an 8-bit key, which is used to look up the corresponding mesh configuration for that cell.
 
 The code snippet below samples each corner of a cell and constructs the lookup key, `caseCode`. Each corner corresponds to one bit in the key. If the sampled value is below the isovalue, that bit is set to `1`; otherwise, it remains `0`.
 
@@ -92,7 +93,7 @@ $$
 \mathbf{p}=\mathbf{A} + \frac{I - a}{b - a}(\mathbf{B} - \mathbf{A})
 $$
 
-where $\mathbf{A}$ and $\mathbf{B}$ are the endpoints of the active edge, $a$ and $b$ are the sample values at the respective vertex, and $I$ is the iso-value (which in our case is 0). 
+where $\mathbf{A}$ and $\mathbf{B}$ are the endpoints of the active edge, $a$ and $b$ are the sample values at the respective vertex, and $I$ is the iso-value (which in our case is 0).
 
 Using interpolation places each generated vertex closer to the actual zero-crossing of the SDF, giving us a more accurate representation of the implicit surface. The sphere below was generated using marching cubes with linear interpolation.
 

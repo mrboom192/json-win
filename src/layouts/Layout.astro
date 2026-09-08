@@ -3,9 +3,11 @@ import "../styles/global.css";
 interface Props {
   title?: string;
   description?: string;
+  color?: string;
 }
 
 const {
+  color,
   title = "json.win - Jason Nguyen",
   description = "Notes and writing by Jason Nguyen.",
 } = Astro.props;
@@ -35,7 +37,7 @@ const {
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
   </head>
-  <body>
+  <body class:list={{ "post-themed": color }} style={color ? { "--post-color": color } : undefined}>
     <slot />
   </body>
 </html>

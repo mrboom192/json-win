@@ -8,6 +8,7 @@ const posts = defineCollection({
     title: z.string().min(1),
     date: z.coerce.date(),
     description: z.string().optional(),
+    color: z.string().regex(/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, 'Use a hex color such as #167a78').default('#167a78'),
     draft: z.boolean().default(false),
     image: image().optional(),
     imageAlt: z.string().default(''),

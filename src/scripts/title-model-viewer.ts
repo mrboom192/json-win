@@ -32,7 +32,15 @@ class TitleModelViewer extends HTMLElement {
       <span id="instructions" class="instructions">Drag or use arrow keys to rotate. Use Home to reset.</span>
       <div class="status" role="status">Loading 3D model…</div>
     `;
+    const preview = this.hasAttribute("preview");
     const canvas = shadow.querySelector("canvas")!;
+    if (preview) {
+      canvas.setAttribute("aria-hidden", "true");
+      canvas.removeAttribute("tabindex");
+      canvas.removeAttribute("aria-describedby");
+      canvas.style.pointerEvents = "none";
+      shadow.querySelector(".instructions")?.remove();
+    }
     canvas.setAttribute(
       "aria-label",
       this.getAttribute("aria-label") ?? "Interactive 3D model",
@@ -85,6 +93,7 @@ class TitleModelViewer extends HTMLElement {
     camera.zoom = initialZoom;
     camera.updateProjectionMatrix();
     const controls = new OrbitControls(camera, canvas);
+    controls.enabled = !preview;
     controls.enablePan = false;
     controls.enableZoom = false;
     controls.enableDamping = true;
@@ -181,7 +190,7 @@ class TitleModelViewer extends HTMLElement {
     };
     controls.addEventListener("start", onInteractionStart);
     controls.addEventListener("end", onInteractionEnd);
-    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    if (!preview) window.addEventListener("pointermove", onPointerMove, { passive: true });
     window.addEventListener("pointerout", onPointerOut);
     window.addEventListener("blur", clearPointer);
     window.addEventListener("scroll", requestRender, {
@@ -287,7 +296,7 @@ class TitleModelViewer extends HTMLElement {
       controls.update();
       requestRender();
     };
-    canvas.addEventListener("keydown", onKey);
+    if (!preview) canvas.addEventListener("keydown", onKey);
     const resizeObserver = new ResizeObserver(() => {
       const { width, height } = this.getBoundingClientRect();
       if (!width || !height) return;

@@ -1,7 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import Layout from "../layouts/Layout.astro";
-import { formatDate, postUrl } from "../lib/posts";
+import { postUrl } from "../lib/posts";
 const posts = (await getCollection("posts", ({ data }) => !data.draft)).sort(
   (a, b) =>
     b.data.date.valueOf() - a.data.date.valueOf() || a.id.localeCompare(b.id),
@@ -28,13 +28,34 @@ const posts = (await getCollection("posts", ({ data }) => !data.draft)).sort(
       <h2 id="posts-title">Topics</h2>
       {
         posts.length ? (
-          <ul>
-            {posts.map((post) => (
+          <ul class="post-grid">
+            {posts.map((post, i) => (
               <li>
-                <a href={postUrl(post.id)}>{post.data.title}</a>
-                <time class="meta" datetime={post.data.date.toISOString()}>
-                  {formatDate(post.data.date)}
-                </time>
+                <a
+                  class="post-card"
+                  href={postUrl(post.id)}
+                  style={{ "--post-color": post.data.color }}
+                >
+                  <div class="card-copy">
+                    <h3>{post.data.title}</h3>
+                    {post.data.description && <p>{post.data.description}</p>}
+                  </div>
+                  {post.data.titleModel && (
+                    <div class="card-model" aria-hidden="true" inert>
+                      <title-model-viewer
+                        preview
+                        src={post.data.titleModel}
+                        rotation={post.data.titleModelRotation}
+                        zoom={post.data.titleModelZoom}
+                        wireframe={String(post.data.titleModelWireframe)}
+                        wireframe-style={post.data.titleModelWireframeStyle}
+                      />
+                    </div>
+                  )}
+                  <span class="post-number">
+                    [{String(i + 1).padStart(2, "0")}]
+                  </span>
+                </a>
               </li>
             ))}
           </ul>
@@ -45,6 +66,18 @@ const posts = (await getCollection("posts", ({ data }) => !data.draft)).sort(
     </section>
   </main>
 </Layout>
+<script>
+  import { whenNearViewport } from "../scripts/viewer-visibility";
+  for (const element of document.querySelectorAll<HTMLElement>(
+    "title-model-viewer[preview]",
+  )) {
+    whenNearViewport(element, () => {
+      void import("../scripts/title-model-viewer").catch((error) =>
+        console.error("Unable to load 3D preview", error),
+      );
+    });
+  }
+</script>
 <style>
   header {
     display: flex;
@@ -52,9 +85,11 @@ const posts = (await getCollection("posts", ({ data }) => !data.draft)).sort(
     justify-content: center;
     align-items: center;
     text-align: center;
+
+    padding: 5rem 0rem;
   }
   .home {
-    padding: 7rem 0 5rem;
+    --page-width: 42.5rem;
   }
   .email {
     margin: 0.5rem 0 0;
@@ -66,41 +101,152 @@ const posts = (await getCollection("posts", ({ data }) => !data.draft)).sort(
     gap: 24px;
     margin-top: 1rem;
   }
-  section {
-    margin-top: 5rem;
+  #posts-title {
+    text-align: center;
+    margin-bottom: 2rem;
   }
-  h3 {
-    margin: 0 0 24px;
-  }
-  ul {
+  .post-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
     list-style: none;
     padding: 0;
-    margin: 0;
   }
   li {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 16px;
-    padding: 20px 0;
-    border-top: 1px solid var(--color-border);
+    position: relative;
   }
-  li a {
-    overflow-wrap: anywhere;
+  .post-number {
+    position: absolute;
+    bottom: 1rem;
+    left: 1rem;
+  }
+  .post-card {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    padding: 1rem;
+
+    background: var(--post-color);
+    border: 1px solid #000;
+
     text-decoration: none;
   }
-  li a:hover {
-    text-decoration: underline;
+  .post-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: #fff;
+    opacity: 0;
+    transition: opacity 280ms ease;
+  }
+
+  .post-card:focus-visible {
+    outline-color: var(--post-color);
+  }
+
+  .post-card:focus-visible::before {
+    opacity: 0.12;
+  }
+
+  .card-copy {
+    position: relative;
+    z-index: 1;
+  }
+  h3 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #000;
+  }
+  .card-copy p {
+    color: #000;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+    font-size: 0.75rem;
+  }
+  .card-model {
+    width: 55%;
+    aspect-ratio: 1;
+    margin: auto -0.25rem -0.75rem auto;
+    pointer-events: none;
+    transform-origin: 65% 65%;
+    transition: transform 350ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .card-model title-model-viewer {
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .post-card:hover::before {
+      opacity: 0.12;
+    }
+    .post-card:hover .card-model {
+      transform: translateX(-0.25rem) translateY(-0.25rem) scale(1.1);
+    }
+  }
+  @media (max-width: 900px) {
+    .post-number {
+      top: 1rem;
+    }
+
+    .post-grid {
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+
+    .post-card {
+      display: flex;
+      flex-direction: row;
+      gap: 1rem;
+      padding-left: 4rem;
+
+      height: 10rem;
+    }
+
+    .card-copy {
+      width: 50%;
+    }
+
+    .card-model {
+      position: absolute;
+      right: -10%;
+      top: 50%;
+      transform: translateY(-25%);
+
+      width: 50%;
+      aspect-ratio: 1;
+    }
+
+    .post-card:hover .card-model {
+      transform: translateY(-25%) translateX(-5%) scale(1.1);
+    }
   }
   @media (max-width: 480px) {
-    .home {
-      padding-top: 80px;
+    .post-grid {
+      gap: 0.75rem;
     }
-    section {
-      margin-top: 4rem;
+    .post-card {
+      min-height: 19rem;
+      padding: 1rem;
     }
-    li {
-      grid-template-columns: 1fr;
-      gap: 0.375rem;
+    h3 {
+      font-size: 0.9375rem;
+    }
+    .card-copy p {
+      font-size: 0.75rem;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .post-card::before,
+    .card-model {
+      transition: none;
+    }
+    .post-card:is(:hover, :focus-visible) .card-model {
+      transform: none;
     }
   }
 </style>

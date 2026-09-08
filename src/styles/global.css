@@ -232,3 +232,16 @@ wireframe-model-viewer {
   border-top: 1px solid var(--color-border);
   margin: 40px 0;
 }
+
+/* Blend the post color over the existing grid; white page areas stay white. */
+body.post-themed { isolation: isolate; }
+body.post-themed::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 240px;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--post-color);
+  mix-blend-mode: overlay;
+}
