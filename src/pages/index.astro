@@ -1,8 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import Layout from "../layouts/Layout.astro";
-import { postUrl } from "../lib/posts";
-const posts = (await getCollection("posts", ({ data }) => !data.draft)).sort(
+const blogs = (await getCollection("blogs", ({ data }) => !data.draft)).sort(
   (a, b) =>
     b.data.date.valueOf() - a.data.date.valueOf() || a.id.localeCompare(b.id),
 );
@@ -22,18 +21,20 @@ const posts = (await getCollection("posts", ({ data }) => !data.draft)).sort(
         >
         <a href="https://github.com/mrboom192">GitHub</a>
         <a href="/jason-nguyen-resume.pdf">Resume</a>
+        <a href="/notes/">Notes</a>
       </nav>
     </header>
     <section aria-labelledby="posts-title">
       <h2 id="posts-title">Blogs</h2>
+      <p class="description">Write ups on topics that I feel proud posting</p>
       {
-        posts.length ? (
+        blogs.length ? (
           <ul class="post-grid">
-            {posts.map((post, i) => (
+            {blogs.map((post) => (
               <li>
                 <a
                   class="post-card"
-                  href={postUrl(post.id)}
+                  href={`/posts/${post.id.split("/").map(encodeURIComponent).join("/")}/`}
                   style={{ "--post-color": post.data.color }}
                 >
                   <div class="card-copy">
@@ -119,13 +120,21 @@ const posts = (await getCollection("posts", ({ data }) => !data.draft)).sort(
 
   nav {
     display: flex;
-    gap: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem 2rem;
     margin-top: 1rem;
   }
 
   #posts-title {
     text-align: center;
-    margin-bottom: 2rem;
+    margin: 0;
+  }
+
+  .description {
+    text-align: center;
+    color: var(--color-muted);
+    font-size: var(--text-small);
   }
 
   .post-grid {
@@ -139,6 +148,7 @@ const posts = (await getCollection("posts", ({ data }) => !data.draft)).sort(
   .post-number {
     grid-area: number;
     align-self: end;
+    color: var(--color-text);
   }
 
   .post-card {
@@ -200,6 +210,8 @@ const posts = (await getCollection("posts", ({ data }) => !data.draft)).sort(
     position: absolute;
     top: 1rem;
     right: 1rem;
+
+    color: var(--color-text);
   }
 
   .card-model {

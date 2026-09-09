@@ -1,5 +1,15 @@
 # Astro Starter Kit: Basics
 
+## Blogs and notes
+
+Store blog Markdown files in `src/content/blogs/` and note Markdown files in
+`src/content/notes/`. The folder determines the type; no frontmatter flag is needed.
+Blogs appear as cards on the homepage. Notes appear at `/notes/`, linked next to
+Resume on the homepage. Both lists sort newest first and exclude drafts.
+
+Individual entries keep their `/posts/<id>/` URLs, so use unique filenames across
+both folders. Notes include a Home > Notes > Title breadcrumb.
+
 ## Header 3D viewer
 
 The header model uses an orthographic camera. Configure it in a post's Markdown frontmatter:

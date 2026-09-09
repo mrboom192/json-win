@@ -190,7 +190,8 @@ class TitleModelViewer extends HTMLElement {
     };
     controls.addEventListener("start", onInteractionStart);
     controls.addEventListener("end", onInteractionEnd);
-    if (!preview) window.addEventListener("pointermove", onPointerMove, { passive: true });
+    if (!preview)
+      window.addEventListener("pointermove", onPointerMove, { passive: true });
     window.addEventListener("pointerout", onPointerOut);
     window.addEventListener("blur", clearPointer);
     window.addEventListener("scroll", requestRender, {

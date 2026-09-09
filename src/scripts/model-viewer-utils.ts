@@ -1,8 +1,14 @@
 import * as THREE from "three";
 import { createQuadWireframe } from "./quad-wireframe";
 
-export function parseViewerVector(value: string | null, fallback: THREE.Vector3) {
-  const parts = value?.trim().split(/[\s,]+/).map(Number);
+export function parseViewerVector(
+  value: string | null,
+  fallback: THREE.Vector3,
+) {
+  const parts = value
+    ?.trim()
+    .split(/[\s,]+/)
+    .map(Number);
   return parts?.length === 3 && parts.every(Number.isFinite)
     ? new THREE.Vector3(parts[0], parts[1], parts[2])
     : fallback.clone();
@@ -33,7 +39,11 @@ export function disposeModel(model: THREE.Object3D) {
   textures.forEach((texture) => texture.dispose());
 }
 
-export function addWireframeOverlay(mesh: THREE.Mesh, style: string | null, wireframeOnly = false) {
+export function addWireframeOverlay(
+  mesh: THREE.Mesh,
+  style: string | null,
+  wireframeOnly = false,
+) {
   if (style === "quads") {
     // Bake the displayed pose so the lines also align with skinned/morphed meshes.
     const geometry = mesh.geometry.clone();
@@ -49,8 +59,7 @@ export function addWireframeOverlay(mesh: THREE.Mesh, style: string | null, wire
       color: 0x17221c,
       depthWrite: false,
     });
-    const count =
-      mesh instanceof THREE.InstancedMesh ? mesh.count : 1;
+    const count = mesh instanceof THREE.InstancedMesh ? mesh.count : 1;
     for (let i = 0; i < count; i++) {
       const overlay = new THREE.LineSegments(edges, material);
       if (mesh instanceof THREE.InstancedMesh) {

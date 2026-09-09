@@ -1,0 +1,96 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../layouts/Layout.astro";
+import Breadcrumb from "../components/Breadcrumb.astro";
+
+const notes = (await getCollection("notes", ({ data }) => !data.draft)).sort(
+  (a, b) =>
+    b.data.date.valueOf() - a.data.date.valueOf() || a.id.localeCompare(b.id),
+);
+---
+
+<Layout title="Notes | Jason Nguyen" description="Notes by Jason Nguyen.">
+  <Breadcrumb current="Notes" />
+  <main class="container">
+    <section class="notes" aria-labelledby="notes-title">
+      <h1 id="notes-title">Notes</h1>
+      <p class="description">Quick notes from things I'm learning</p>
+      {
+        notes.length ? (
+          <ul class="note-list">
+            {notes.map((post) => (
+              <li>
+                <a
+                  href={`/posts/${post.id.split("/").map(encodeURIComponent).join("/")}/`}
+                >
+                  {post.data.title}
+                </a>
+                <time class="meta" datetime={post.data.date.toISOString()}>
+                  {new Intl.DateTimeFormat("en-US", {
+                    month: "short",
+                    year: "numeric",
+                    timeZone: "UTC",
+                  }).format(post.data.date)}
+                </time>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p class="meta">No notes yet.</p>
+        )
+      }
+    </section>
+  </main>
+</Layout>
+
+<style>
+  #notes-title,
+  .description {
+    text-align: center;
+  }
+
+  .description {
+    color: var(--color-muted);
+    font-size: var(--text-small);
+    margin-bottom: 2rem;
+  }
+
+  .notes {
+    margin-top: 5rem;
+    padding-bottom: 5rem;
+  }
+
+  .note-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .note-list li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 16px;
+    padding: 20px 0;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .note-list a {
+    overflow-wrap: anywhere;
+    text-decoration: none;
+  }
+
+  .note-list a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 480px) {
+    .notes {
+      margin-top: 4rem;
+    }
+
+    .note-list li {
+      grid-template-columns: 1fr;
+      gap: 0.375rem;
+    }
+  }
+</style>
