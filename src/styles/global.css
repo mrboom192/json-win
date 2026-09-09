@@ -13,7 +13,7 @@
   --page-width: 42.5rem;
   --page-gutter: 1.25rem;
   color: var(--color-text);
-  background: var(--color-background);
+  background: color-mix(in srgb, var(--post-color) 65%, transparent) 0%;
   --font-body:
     "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     "Liberation Mono", monospace;
