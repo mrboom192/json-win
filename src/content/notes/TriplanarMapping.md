@@ -15,3 +15,15 @@ Triplanar project generates three sets of texture coordinates by projecting the 
 If the surface normal forms an obtuse angle with the plane's normal, then the texture image is flipped in one direction. This is mitigated by negating one of the texture coordinates generated for each plane whenever the surface normal forms a negative dot product with the plane normal, which is just picking off individual components of the surface normal because the plane normals are aligned to the coordinate axes.
 
 We calculate our three sets of texture coordinates $(s_x,t_x), (s_y,t_y), (s_z,t_z)$ as follows, where $\mathbf{p}$ is the scaled vertex position.
+
+$$
+\begin{aligned}
+s_x &= 
+\begin{cases}
+p_y, & \text{if } N_x \ge 0, \\
+-p_y, & \text{if } N_x < 0;
+\end{cases}
+\\
+
+\end{aligned}
+$$
