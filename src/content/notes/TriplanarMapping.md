@@ -24,6 +24,21 @@ p_y, & \text{if } N_x \ge 0, \\
 -p_y, & \text{if } N_x < 0;
 \end{cases}
 \\
-
+s_y &=
+\begin{cases}
+-p_x, & \text{if } N_y \ge 0, \\
+p_x, & \text{if } N_y < 0;
+\end{cases}
+\\
+s_z &=
+\begin{cases}
+p_x, & \text{if } N_z \ge 0, \\
+-p_x, & \text{if } N_z < 0;
+\end{cases}
+\\
+t_x &= t_y = p_z \\
+t_z &= p_y.
 \end{aligned}
 $$
+
+Using the coordinates provided by this equation ensures that a texture image is never mirrored when a cube face is viewed from its front side. Once the three sets of texture coordinates have been determined, we can sample one texture map at three different locations, or we can choose to sample up to three different texture maps. In GDShader, we do this using the `texture()` function. We'll have to combine the color samples in such a way that stretching caused by any one of the projections is not visible. Using the normalized weighted averages based on absolute surface norman components gives a sufficient blend. Another effective method for calculating blend weights $b_x$, $b_y$, and $b_z$ is to use the formulas
