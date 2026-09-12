@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "notes/GLSL Hello World.md",
+                "file": "notes/TriplanarMapping.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "GLSL Hello World"
+              "title": "TriplanarMapping"
             }
           }
         ]
@@ -188,8 +188,11 @@
   "active": "5aaf6bb7348e8deb",
   "lastOpenFiles": [
     "blogs/Procedural Terrain.md",
-    "blogs/Godot Shaders.md",
+    "notes/TriplanarMapping.md",
+    "Pasted image 20260912125835.png",
+    "triplanar-example.png",
     "notes/GLSL Hello World.md",
+    "blogs/Godot Shaders.md",
     "Shaders.md",
     "2026-09-05.md",
     "Procedural Terrain.md",
