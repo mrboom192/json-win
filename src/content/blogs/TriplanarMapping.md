@@ -1,7 +1,14 @@
 ---
 title: Triplanar Projection
-date: 2026-09-11
+date: 2026-08-22
+description: Mapping textures using triplanar projection
+color: "#F599C6"
 draft: false
+titleModel: /models/triplanar.glb
+titleModelZoom: 0.66
+titleModelWireframe: true
+titleModelRotation: -99.5
+titleModelWireframeStyle: quads
 ---
 
 ## Texture Mapping
@@ -18,7 +25,7 @@ We calculate our three sets of texture coordinates $(s_x,t_x), (s_y,t_y), (s_z,t
 
 $$
 \begin{aligned}
-s_x &= 
+s_x &=
 \begin{cases}
 p_y, & \text{if } N_x \ge 0, \\
 -p_y, & \text{if } N_x < 0;
@@ -41,9 +48,10 @@ t_z &= p_y.
 \end{aligned}
 $$
 
-Using the coordinates provided by this equation ensures that a texture image is never mirrored when a cube face is viewed from its front side. Once the three sets of texture coordinates have been determined, we can sample one texture map at three different locations, or we can choose to sample up to three different texture maps. In GDShader, we do this using the `texture()` function. We'll have to combine the color samples in such a way that stretching caused by any one of the projections is not visible. Using the normalized weighted averages based on absolute surface norman components gives a sufficient blend. 
+Using the coordinates provided by this equation ensures that a texture image is never mirrored when a cube face is viewed from its front side. Once the three sets of texture coordinates have been determined, we can sample one texture map at three different locations, or we can choose to sample up to three different texture maps. In GDShader, we do this using the `texture()` function. We'll have to combine the color samples in such a way that stretching caused by any one of the projections is not visible. Using the normalized weighted averages based on absolute surface norman components gives a sufficient blend.
 
 For my implementation in Godot, I'll calculate the blend weights $b_x$, $b_y$, and $b_z$ using the formulas
+
 $$
 \begin{aligned}
 b_x &= (\max{\frac{|N_x|}{||\mathbf{N}||}-\delta, 0})^m \\
@@ -51,7 +59,9 @@ b_y &= (\max{\frac{|N_y|}{||\mathbf{N}||}-\delta, 0})^m \\
 b_z &= (\max{\frac{|N_z|}{||\mathbf{N}||}-\delta, 0})^m, \\
 \end{aligned}
 $$
+
 where $\mathbf{N}$ is the interpolated vertex normal, $\delta$ is a real number in the interval $[0, \sqrt{3}/3)$, and $m$ is a positive integer. We'll want to ensure the weights are normalized/sum to unity, so we do
+
 $$
 \begin{aligned}
 b'_x &= \frac{b_x}{b_x + b_y + b_z} \\
@@ -59,15 +69,19 @@ b'_y &= \frac{b_y}{b_x + b_y + b_z} \\
 b'_z &= \frac{b_z}{b_x + b_y + b_z}. \\
 \end{aligned}
 $$
+
 The final blended texture sample $C$ is given by
+
 $$
 C = b'_xC_x(s_x,t_x)+b'_yC_y(s_y,t_y)+b'_zC_z(s_z,t_z),
 $$
-where $C_x$, $C_y,$ and $C_z$ are functions representing the value returned by sampling the texture maps associated with the plane normal directions $x$, $y$, and $z$. 
+
+where $C_x$, $C_y,$ and $C_z$ are functions representing the value returned by sampling the texture maps associated with the plane normal directions $x$, $y$, and $z$.
 
 ## Godot Shader Implementation
 
 We can implement the above into a Godot spatial shader to render textures for say terrain.
+
 ```glsl
 shader_type spatial;
 
@@ -91,23 +105,23 @@ vec3 triplanar(sampler2D txt_x, sampler2D txt_y, sampler2D txt_z, vec3 p, vec3 n
 	// Sample the 3 texture maps, and f.a is used to only negate one axis
 	vec4 x = texture(txt_x, (p.yz * f.ra) / scale);
 	vec4 y = texture(txt_y, (p.zx * f.ga) / scale);
-	vec4 z = texture(txt_z, (p.xy * f.ba) / scale); 
-	
+	vec4 z = texture(txt_z, (p.xy * f.ba) / scale);
+
 	// Get blend weights
 	float bx = pow(max(abs(n.x) - delta, 0.0), m);
 	float by = pow(max(abs(n.y) - delta, 0.0), m);
 	float bz = pow(max(abs(n.z) - delta, 0.0), m);
-	
+
 	// Blend the values
 	vec4 res = (bx * x + by * y + bz * z) / max(bx + by + bz, 0.001);
-	
+
 	return res.xyz;
 }
 
 void fragment() {
 	vec3 pos = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	vec3 nor = (INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz;
-	
+
 	ALBEDO = triplanar(alb_x, alb_y, alb_z, pos, nor);
 }
 ```
