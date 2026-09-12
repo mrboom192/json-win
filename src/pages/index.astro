@@ -11,7 +11,7 @@ const blogs = (await getCollection("blogs", ({ data }) => !data.draft)).sort(
   title="Jason Nguyen | json.win"
   description="Notes and writing by Jason Nguyen."
 >
-  <main class="home container">
+  <main class="container">
     <header>
       <h1>Jason Nguyen</h1>
       <p class="email meta">jason.n.nguyen.04@gmail.com</p>
@@ -108,10 +108,6 @@ const blogs = (await getCollection("blogs", ({ data }) => !data.draft)).sort(
     text-align: center;
 
     padding: 5rem 0rem;
-  }
-
-  .home {
-    --page-width: 42.5rem;
   }
 
   .email {

@@ -1,5 +1,7 @@
 ---
 import "../styles/global.css";
+import "katex/dist/katex.min.css";
+
 interface Props {
   title?: string;
   description?: string;
@@ -9,7 +11,7 @@ interface Props {
 const {
   color,
   title = "json.win - Jason Nguyen",
-  description = "Notes and writing by Jason Nguyen.",
+  description = "My website",
 } = Astro.props;
 ---
 
