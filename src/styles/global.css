@@ -122,6 +122,10 @@ h6 {
   font-size: var(--text-body);
 }
 
+img {
+  border-radius: 0.25rem;
+}
+
 .container {
   width: min(100% - 2 * var(--page-gutter), var(--page-width));
   margin-inline: auto;
