@@ -13,7 +13,7 @@ titleModelWireframeStyle: quads
 
 ## Texture Mapping
 
-In order to apply texture maps to a mesh, we must be able to specify a mapping function that provides texture sampling coordinates for each vertex position. This is ordinarily accomplished by performing some kind of projection on the vertex positions themselves to obtain two-dimensional texture coordinates. One such method is triplanar projection.
+In order to apply texture maps to a mesh, we must be able to specify a mapping function that provides texture sampling coordinates for each vertex position. This is ordinarily accomplished by performing some kind of projection on the vertex positions themselves to obtain two-dimensional texture coordinates. In certain scenarios, however, mapping textures in this way can cause stretching artifacts when the slope of the surface approaches infinity. This issue is especially prevalent when dealing with voxel terrain. **Triplanar projection** is a technique that addresses this problem by projecting the texture along multiple axes and blending the results based on the orientation of the surface.
 
 ## Triplanar Projection
 
