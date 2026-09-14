@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "blogs/Procedural Terrain.md",
+                "file": "notes/Implementing Voronoi and Poisson Disc Sampling.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Procedural Terrain"
+              "title": "Implementing Voronoi and Poisson Disc Sampling"
             }
           }
         ]
@@ -187,15 +187,17 @@
   },
   "active": "5aaf6bb7348e8deb",
   "lastOpenFiles": [
-    "blogs/Triplanar Projection.md",
+    "notes/s.md",
+    "notes/Implementing Voronoi and Poisson Disc Sampling.md",
     "notes/Godot Shaders.md",
+    "notes/GLSL Hello World.md",
+    "blogs/Procedural Terrain.md",
+    "blogs/Triplanar Projection.md",
     "blogs/TriplanarMapping.md",
     "blogs/Godot Shaders.md",
     "notes/TriplanarMapping.md",
-    "blogs/Procedural Terrain.md",
     "Pasted image 20260912125835.png",
     "triplanar-example.png",
-    "notes/GLSL Hello World.md",
     "Shaders.md",
     "2026-09-05.md",
     "Procedural Terrain.md",
