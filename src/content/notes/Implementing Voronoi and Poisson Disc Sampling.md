@@ -1,7 +1,6 @@
 ---
 title: Implementation notes
 date: 2026-09-13
-description:
 draft: false
 ---
 
