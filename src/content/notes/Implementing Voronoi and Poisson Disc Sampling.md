@@ -19,3 +19,9 @@ We want some function $F$ that takes in our $(u, v)$ coordinates and some value 
 $$
 F: (u, v, r) \rightarrow (u', v')
 $$
+
+## To study
+
+[Lambert's Cosine Law](https://en.wikipedia.org/wiki/Lambert%27s_cosine_law)
+
+W
